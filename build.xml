@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<project name="PathSBML" default="jar" basedir=".">
+
+	<property name="version.number" value="1.0.0" />
+	<property name="pathvisio.dir" value="../common-bundles" />
+	<property name="org.pathvisio.sbgn.dir" value="../SBGN" />
+	<property name="common.bundles" value="../common-bundles" />
+
+	<import file="${common.bundles}/plugin-common.xml"/>
+		<!-- embedded jars are embedded in the resulting bundle -->
+		<path id="embed.jars">
+			<fileset dir="lib">
+				<include name="*.jar" />
+			</fileset>
+			<fileset dir="${common.bundles}">
+				<include name="org.sbgn-with-dependencies.jar" />
+				<include name="com.google.collect*.jar" />
+				<include name="com.springsource.javax.xml.rpc-1.1.0.jar" />
+			</fileset>
+		</path>
+
+	<path id="project.class.path">
+		<fileset dir="${pathvisio.dir}/modules">
+			<include name="org.pathvisio.core.jar" />
+			<include name="org.pathvisio.gui.jar" />
+			<include name="org.pathvisio.desktop.jar" />
+		</fileset>
+		<fileset dir="${common.bundles}">
+			<include name="org.sbgn-with-dependencies.jar" />
+			<include name="com.google.collect*.jar" />
+			<include name="com.springsource.javax.xml.rpc-1.1.0.jar" />
+		</fileset>
+		<fileset dir="${org.pathvisio.sbgn.dir}">
+			<include name="dist/org.pathvisio.sbgn.jar" />
+		</fileset>
+		<fileset dir="${pathvisio.dir}/lib">
+			<include name="org.bridgedb.jar" />
+			<include name="felix.jar" />
+			<include name="com.springsource.org.jdom-1.1.0.jar" />
+			<include name="org.pathvisio.jgoodies.forms.jar" />
+			<include name="javax.xml.rpc_1.1.0.v201005080400.jar"/>
+		</fileset>
+		<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+	</path>
+
+	<target name="prepare" depends ="prepare-jar-name,prepare-common">
+			<mkdir dir="build"/>
+			<mkdir dir="${bundle.dest}"/>
+			<mkdir dir="build/resources"/>
+		<echo>Copying resources and Libraries</echo>
+			<copy toDir="build/resources">
+				<fileset dir="resources">
+					<include name="*"/>
+				</fileset>
+			</copy>
+			<copy toDir="build/lib">
+					<fileset dir="lib">
+						<include name="*.jar"/>
+					</fileset>
+					<fileset dir="${common.bundles}">
+						<include name="org.sbgn-with-dependencies.jar" />
+						<include name="com.google.collect*.jar" />
+						<include name="com.springsource.javax.xml.rpc-1.1.0.jar" />
+					</fileset>
+			</copy>
+			<fail message="Can't find ${pathvisio.dir}/modules/org.pathvisio.core.jar, please specify the path to pathvisio with -Dpathvisio.dir=....">
+				<condition>
+					<not><available file="${pathvisio.dir}/modules/org.pathvisio.core.jar"/></not>
+				</condition>
+			</fail>
+		</target>
+
+		<target name="clean">
+			<delete dir="build"/>
+			<delete file="${jar.name}"/>
+		</target>
+
+		<target name="compile" depends="prepare">
+			<echo>Compiling: ${jar.name}</echo>
+			<javac srcdir="src"
+				   includes="**"
+				   destdir="build"
+				   debug="${debug.mode}"
+				   source="1.5">
+	       <classpath refid="project.class.path"/>
+			</javac>
+		</target>
+
+		<target name="jar" depends="compile"> 
+			<echo>Creating JAR: ${jar.name}</echo>
+			<jar jarfile="${jar.name}_${version.number}.jar" manifest="META-INF/MANIFEST.MF">
+			    <fileset dir="build">
+				    <include name="**/*"/>
+				</fileset>
+	     </jar>
+		</target>
+
+		<target name="install" depends="jar"> 
+			<copy toDir="${bundle.dest}" flatten="true">
+				<fileset dir=".">
+					<include name="${jar.name}"/>
+				</fileset>
+				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+				<fileset dir="${common.bundles}">
+						<include name="org.sbgn-with-dependencies.jar" />
+						<include name="com.google.collect*.jar" />
+					</fileset>
+					<fileset dir="${org.pathvisio.sbgn.dir}">
+						<include name="dist/org.pathvisio.sbgn.jar" />
+					</fileset>
+					<fileset dir="${pathvisio.dir}/lib">
+						<include name="org.bridgedb.jar" />
+						<include name="felix.jar" />
+						<include name="com.springsource.org.jdom-1.1.0.jar" />
+						<include name="org.pathvisio.jgoodies.forms.jar" />
+						<include name="javax.xml.rpc_1.1.0.v201005080400.jar"/>
+					</fileset>
+			</copy>
+			<delete file="${jar.name}"/>
+		</target>
+
+		<target name="dist-clean" depends="clean">
+			<delete dir="${bundle.dest}"/>
+		</target>
+
+</project>
