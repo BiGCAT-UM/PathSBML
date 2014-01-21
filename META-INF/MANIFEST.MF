@@ -3,6 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: PathSBML-plugin
 Bundle-SymbolicName: pvplugins-PathSBML
 Bundle-Version: 1.0.0
+Bundle-Description: Import, Validate and Export SBML models
+Bundle-License: http://www.apache.org/licenses/LICENSE-2.0.txt
 Bundle-ClassPath: .,
  lib/biomodels-wslib_standalone-1.21.jar,
  lib/jsbml-1.0-a1-with-dependencies.jar,
