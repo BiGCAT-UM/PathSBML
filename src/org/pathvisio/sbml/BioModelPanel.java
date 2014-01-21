@@ -64,12 +64,13 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import org.pathvisio.sbml.SBMLPlugin;
 /**
- * This class creates the search panel for searching bio models and
+ * This class creates the search & browse panel for searching bio models and
  * content in the dialog of the Search.
  * This class enables us to search the bio models by various terms like
  * bio model name,publication title/id,person/encoder name,uniprot id,
  * go id and taxonomy id.
  * @author applecool
+ * @author anwesha
  */
 public class BioModelPanel extends JPanel {
 	
