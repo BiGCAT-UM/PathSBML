@@ -155,7 +155,6 @@ public class SBMLPlugin implements Plugin {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			// TODO Auto-generated method stub
 			ValidatePanel vp = new ValidatePanel();
 			JDialog d = new JDialog(desktop.getFrame(), "Validate");
 			d.getContentPane().add(vp);
@@ -186,10 +185,7 @@ public class SBMLPlugin implements Plugin {
 	private SBMLDocument lastImported = null;
 	Component sbmlPanel;
 
-	File tmpDir = new File(GlobalPreference.getApplicationDir(), "models-cache");
-
-	File tmpDir2 = new File(GlobalPreference.getApplicationDir(),
-			"sbml-models-cache");
+	private File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
 
 	private final ValidateToolBarAction validateAction = new ValidateToolBarAction();
 
@@ -221,10 +217,11 @@ public class SBMLPlugin implements Plugin {
 	@Override
 	public void done() {
 		desktop.getSideBarTabbedPane().remove(sbmlPanel);
-		// // remove our action (defined below) from the toolbar
-		// desktop.getSwingEngine().getApplicationPanel().removeFromToolbar(validateButton);
-		// desktop.getSwingEngine().getApplicationPanel().removeFromToolbar(layoutButton);
-		// desktop.getSwingEngine().getApplicationPanel().removeFromToolbar(biomodelButton);
+		
+		desktop.unregisterSubMenu("Plugins", sbmlmenu);
+        if(tmpDir.exists()) {
+                tmpDir.delete();
+        }
 	}
 
 	public Map<String, BioModelsWSClient> getClients() {
@@ -232,7 +229,6 @@ public class SBMLPlugin implements Plugin {
 	}
 
 	public File getTmpDir() {
-		// TODO Auto-generated method stub
 		return tmpDir;
 	}
 
@@ -240,8 +236,8 @@ public class SBMLPlugin implements Plugin {
 	public void init(PvDesktop desktop) {
 		try {
 			tmpDir.mkdirs();
-			tmpDir2.mkdirs();
 			loadClient();
+			
 			// save the desktop reference so we can use it later
 			this.desktop = desktop;
 
@@ -251,10 +247,8 @@ public class SBMLPlugin implements Plugin {
 			desktop.getSwingEngine().getEngine().addPathwayImporter(sbmlFormat);
 
 			// register menu items
-			// desktop.registerMenuAction("Plugins", biomodelAction);
 			createSbmlMenu();
-			// desktop.registerSubMenu("Plugins", sbmlmenu);
-
+			
 			// add new SBML side pane
 			DocumentPanel pane = new DocumentPanel(desktop.getSwingEngine());
 			JTabbedPane sidebarTabbedPane = desktop.getSideBarTabbedPane();
@@ -263,6 +257,7 @@ public class SBMLPlugin implements Plugin {
 			// add functionality to the pane
 			desktop.getSwingEngine().getEngine()
 					.addApplicationEventListener(pane);
+			
 		} catch (Exception e) {
 			Logger.log.error("Error while initializing ", e);
 			JOptionPane.showMessageDialog(desktop.getSwingEngine()
@@ -297,7 +292,7 @@ public class SBMLPlugin implements Plugin {
 			PeerModel br = PeerModel.createFromDoc(doc, tmp);
 			Pathway pw = br.getPathway();
 
-			File tmp2 = new File(tmpDir2, id + ".xml");
+			File tmp2 = new File(tmpDir, id + ".xml");
 			pw.writeToXml(tmp2, true);
 
 			Engine engine = desktop.getSwingEngine().getEngine();
