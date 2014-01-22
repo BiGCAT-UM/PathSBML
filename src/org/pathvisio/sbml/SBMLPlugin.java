@@ -214,7 +214,7 @@ public class SBMLPlugin implements Plugin {
 		sbmlmenu.add(biomodels);
 		sbmlmenu.add(layout);
 		sbmlmenu.add(validate);
-		
+
 		desktop.registerSubMenu("Plugins", sbmlmenu);
 	}
 
@@ -304,7 +304,6 @@ public class SBMLPlugin implements Plugin {
 			engine.setWrapper(desktop.getSwingEngine().createWrapper());
 			SBMLFormat.doc = doc;
 			engine.openPathway(tmp2);
-			updateMenu();
 
 		} catch (XMLStreamException e) {
 			// TODO Auto-generated catch block
@@ -353,25 +352,6 @@ public class SBMLPlugin implements Plugin {
 	 */
 	public void setLastImported(SBMLDocument document) {
 		lastImported = document;
-
-	}
-
-	/**
-	 * Checks if a pathway is open or not. If there is no open pathway, the
-	 * layout option is disabled.
-	 */
-	public void updateMenu() {
-		// boolean status = desktop.getSwingEngine().getEngine().hasVPathway();
-		if (desktop.getSwingEngine().getEngine().hasVPathway()) {
-			Pathway pathwayOpen = desktop.getSwingEngine().getEngine()
-					.getActivePathway();
-			if (pathwayOpen.getDataObjects().size() > 3) {
-				System.out.println(pathwayOpen.getDataObjects().size());
-				layout.setEnabled(true);
-			} else {
-				layout.setEnabled(false);
-			}
-		}
 
 	}
 
