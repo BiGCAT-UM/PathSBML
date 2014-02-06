@@ -1,19 +1,20 @@
 // PathVisio,
 // a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2009 BiGCaT Bioinformatics
+// Copyright 2006-2014 BiGCaT Bioinformatics
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); 
-// you may not use this file except in compliance with the License. 
-// You may obtain a copy of the License at 
-// 
-// http://www.apache.org/licenses/LICENSE-2.0 
-//  
-// Unless required by applicable law or agreed to in writing, software 
-// distributed under the License is distributed on an "AS IS" BASIS, 
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-// See the License for the specific language governing permissions and 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package org.pathvisio.sbml;
 
 import java.awt.BorderLayout;
@@ -33,6 +34,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.SimpleAttributeSet;
@@ -45,51 +47,57 @@ import org.sbml.jsbml.SBMLError;
 import org.sbml.jsbml.SBMLReader;
 
 /**
- * This class adds the validation functionality.It lets us validate the 
- * selected SBML file.
+ * This class adds the validation functionality.It lets us validate the selected
+ * SBML file.
  * 
  * @author applecool
- *
+ * @author anwesha
+ * @version 1.0.0
+ * 
  */
+@SuppressWarnings("serial")
 public class ValidatePanel extends JPanel implements ActionListener {
 
-	JFileChooser fc;
-	JButton openButton;
-	JButton validateButton;
-	JTextPane textPane;
+	private JFileChooser fc;
+	private JButton openButton;
+	private JButton validateButton;
+	private JTextPane textPane;
 
-	StyledDocument doc;
+	private StyledDocument doc;
 	final JLabel statusbar = new JLabel(
 			"Output of your selection will appear here", SwingConstants.RIGHT);
 	static String filename;
 
+	/**
+	 * 
+	 */
 	public ValidatePanel() {
 
 		super(new BorderLayout());
 		// create a file chooser
-		fc = new JFileChooser();
+		this.setFc(new JFileChooser());
 		// filtering the files based on their extensions.
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
 				"SBML(Systems Biology Markup Language) (.sbml,.xml)", "sbml",
 				"xml");
-		fc.setFileFilter(filter);
-		//create a new text pane. 
-		textPane = new JTextPane();
-		textPane.setEnabled(true);
+		this.getFc().setFileFilter(filter);
+		//create a new text pane.
+		this.setTextPane(new JTextPane());
+		this.getTextPane().setEnabled(true);
 		//added scroll bars to the text pane.
-		JScrollPane scrollPane = new JScrollPane(textPane);
+		JScrollPane scrollPane = new JScrollPane(this.getTextPane());
 		scrollPane.setPreferredSize(new Dimension(500, 400));
 		scrollPane
-				.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
 		scrollPane
-				.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		
+		.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
 		// buttons displayed in the validation dialog box.
-		openButton = new JButton("Open");
-		validateButton = new JButton("Validate the file");
-		openButton.addActionListener(this);
-		validateButton.addActionListener(this);
-		
+		this.setOpenButton(new JButton("Open"));
+		this.setValidateButton(new JButton("Validate the file"));
+		this.getOpenButton().addActionListener(this);
+		this.getValidateButton().addActionListener(this);
+
 		//JPanel for the buttons with the borders.
 		JPanel buttonPanel = new JPanel();
 		GridBagLayout gridbag = new GridBagLayout();
@@ -98,19 +106,19 @@ public class ValidatePanel extends JPanel implements ActionListener {
 		c.gridwidth = GridBagConstraints.REMAINDER; // last
 		c.anchor = GridBagConstraints.WEST;
 		c.weightx = 1.0;
-		buttonPanel.add(statusbar, c);
+		buttonPanel.add(getStatusbar(), c);
 		buttonPanel.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Button Pane"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
 
-		buttonPanel.add(openButton);
-		buttonPanel.add(validateButton);
-		buttonPanel.add(statusbar);
+		buttonPanel.add(this.getOpenButton());
+		buttonPanel.add(this.getValidateButton());
+		buttonPanel.add(getStatusbar());
 		// adding the buttonpanel in the center.
 		add(buttonPanel, BorderLayout.CENTER);
 
-		statusbar.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		
+		getStatusbar().setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
 		//new panel for displaying the output with borders.
 		JPanel outputPanel = new JPanel();
 		GridBagLayout gridbag1 = new GridBagLayout();
@@ -127,9 +135,9 @@ public class ValidatePanel extends JPanel implements ActionListener {
 		// adding the output panel to the south of the dialog box.
 		add(outputPanel, BorderLayout.SOUTH);
 	}
-	
+
 	/**
-	 * This method adds the action to the "open" and "validate the file" buttons 
+	 * This method adds the action to the "open" and "validate the file" buttons
 	 * in the button panel.
 	 * 
 	 * When clicked on the open button, a file chooser window gets opened
@@ -138,33 +146,33 @@ public class ValidatePanel extends JPanel implements ActionListener {
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		if (e.getSource() == openButton) {
+		if (e.getSource() == getOpenButton()) {
 
-			int returnVal = fc.showOpenDialog(ValidatePanel.this);
+			int returnVal = getFc().showOpenDialog(ValidatePanel.this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
+				File file = getFc().getSelectedFile();
 				filename = file.getPath();
 
-				statusbar.setText("You chose" + " " + file.getName());
+				getStatusbar().setText("You chose" + " " + file.getName());
 			} else {
 
-				statusbar.setText("You cancelled.");
+				getStatusbar().setText("You cancelled.");
 			}
 		}
 
-		else if (e.getSource() == validateButton) {
+		else if (e.getSource() == getValidateButton()) {
 
 			validate();
 
 		}
 
 	}
-	
+
 	/**
 	 * This method will validate the selected file.
 	 * 
 	 */
+	@Override
 	public void validate() {
 
 		String selectFile = ValidatePanel.filename;
@@ -186,12 +194,12 @@ public class ValidatePanel extends JPanel implements ActionListener {
 		}
 		stop = System.currentTimeMillis();
 
-		textPane.setText("");
+		getTextPane().setText("");
 
 		if (document.getErrorCount() > 0) {
-			textPane.setText("Encountered the following errors while reading the SBML file:\n");
+			getTextPane().setText("Encountered the following errors while reading the SBML file:\n");
 			document.printErrors(System.out);
-			textPane.setText("\nFurther consistency checking and validation aborted.\n");
+			getTextPane().setText("\nFurther consistency checking and validation aborted.\n");
 		} else {
 			long errors = document.checkConsistency();
 			long size = new File(selectFile).length();
@@ -199,7 +207,7 @@ public class ValidatePanel extends JPanel implements ActionListener {
 			System.out.println("            filename: " + selectFile + "\n");
 			System.out.println("           file size: " + size + "\n");
 			System.out
-					.println("      read time (ms): " + (stop - start) + "\n");
+			.println("      read time (ms): " + (stop - start) + "\n");
 
 			append("validation error(s): " + errors + "\n", Color.RED);
 
@@ -231,7 +239,7 @@ public class ValidatePanel extends JPanel implements ActionListener {
 		}
 
 	}
-	
+
 	/**
 	 * This method appends the error messages generated by the SBMLError in the validate
 	 * function to the text pane.
@@ -242,18 +250,95 @@ public class ValidatePanel extends JPanel implements ActionListener {
 	 * @param c
 	 */
 	public void append(String s, Color c) {
-		doc = textPane.getStyledDocument();
+		setDoc(getTextPane().getStyledDocument());
 		SimpleAttributeSet keyword = new SimpleAttributeSet();
 		StyleConstants.setForeground(keyword, c);
 
 		StyleConstants.setBold(keyword, true);
 		try {
 
-			doc.insertString(doc.getLength(), s, keyword);
+			getDoc().insertString(getDoc().getLength(), s, keyword);
 
 		} catch (Exception e) {
 
 		}
+	}
+
+	/**
+	 * @return the statusbar
+	 */
+	public JLabel getStatusbar() {
+		return this.statusbar;
+	}
+
+	/**
+	 * @return the openButton
+	 */
+	public JButton getOpenButton() {
+		return this.openButton;
+	}
+
+	/**
+	 * @param openButton the openButton to set
+	 */
+	public void setOpenButton(JButton openButton) {
+		this.openButton = openButton;
+	}
+
+	/**
+	 * @return the fc
+	 */
+	public JFileChooser getFc() {
+		return this.fc;
+	}
+
+	/**
+	 * @param fc the fc to set
+	 */
+	public void setFc(JFileChooser fc) {
+		this.fc = fc;
+	}
+
+	/**
+	 * @return the validateButton
+	 */
+	public JButton getValidateButton() {
+		return this.validateButton;
+	}
+
+	/**
+	 * @param validateButton the validateButton to set
+	 */
+	public void setValidateButton(JButton validateButton) {
+		this.validateButton = validateButton;
+	}
+
+	/**
+	 * @return the textPane
+	 */
+	public JTextPane getTextPane() {
+		return this.textPane;
+	}
+
+	/**
+	 * @param textPane the textPane to set
+	 */
+	public void setTextPane(JTextPane textPane) {
+		this.textPane = textPane;
+	}
+
+	/**
+	 * @return the doc
+	 */
+	public StyledDocument getDoc() {
+		return this.doc;
+	}
+
+	/**
+	 * @param doc the doc to set
+	 */
+	public void setDoc(StyledDocument doc) {
+		this.doc = doc;
 	}
 
 }
