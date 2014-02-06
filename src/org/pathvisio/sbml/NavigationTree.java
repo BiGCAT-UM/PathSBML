@@ -1,20 +1,19 @@
 // PathVisio,
 // a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2014 BiGCaT Bioinformatics
+// Copyright 2006-2009 BiGCaT Bioinformatics
 //
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
+// Licensed under the Apache License, Version 2.0 (the "License"); 
+// you may not use this file except in compliance with the License. 
+// You may obtain a copy of the License at 
+// 
+// http://www.apache.org/licenses/LICENSE-2.0 
+//  
+// Unless required by applicable law or agreed to in writing, software 
+// distributed under the License is distributed on an "AS IS" BASIS, 
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+// See the License for the specific language governing permissions and 
 // limitations under the License.
 //
-
 package org.pathvisio.sbml;
 
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import java.util.Map;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-
 import org.sbml.jsbml.Compartment;
 import org.sbml.jsbml.ListOf;
 import org.sbml.jsbml.Model;
@@ -31,66 +29,40 @@ import org.sbml.jsbml.NamedSBase;
 import org.sbml.jsbml.Reaction;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.Species;
-
 /**
- * This class helps to visualize the components of the SBML document in the tree
- * model format.
- * 
+ * This class helps to visualize the components of the SBML document in the 
+ * tree model format.
  * @author applecool
- * @author anwesha
- * @version 1.0.0
- * 
+ *
  */
 public class NavigationTree {
-	/**
-	 * 
-	 */
 	public static final String COMPARTMENTS = "Compartments";
-	/**
-	 * 
-	 */
 	public static final String SPECIES = "Species";
-	/**
-	 * 
-	 */
 	public static final String REACTIONS = "Reactions";
-	private final Map<String, NamedSBase> objectMap;
-	private final Map<String, TreePath> objectPathMap;
+	private Map<String, NamedSBase> objectMap;
+	private Map<String, TreePath> objectPathMap;
 	private DefaultTreeModel treeModel;
 
-
-	/**
-	 * @return
-	 */
 	public Map<String, NamedSBase> getObjectMap() {
 		return this.objectMap;
 	}
 
-	/**
-	 * @return
-	 */
 	public Map<String, TreePath> getObjectPathMap() {
 		return this.objectPathMap;
 	}
 
-	/**
-	 * @return
-	 */
 	public DefaultTreeModel getTreeModel() {
 		return this.treeModel;
 	}
 
-	/**
-	 * 
-	 */
 	public NavigationTree() {
-		this.objectMap = new HashMap<String, NamedSBase>();
-		this.objectPathMap = new HashMap<String, TreePath>();
+		this.objectMap = new HashMap();
+		this.objectPathMap = new HashMap();
 
 		this.treeModel = new DefaultTreeModel(
 				new DefaultMutableTreeNode("sbml"));
 	}
-
+	
 	/**
 	 * 
 	 * @param document
@@ -108,17 +80,14 @@ public class NavigationTree {
 
 	}
 
-	/**
-	 * @param id
-	 * @return
-	 */
 	public NamedSBase getNamedSBaseById(String id) {
 		NamedSBase nsb = null;
-		if (this.objectMap.containsKey(id))
-			return this.objectMap.get(id);
+		if (this.objectMap.containsKey(id)) {
+			return (NamedSBase) this.objectMap.get(id);
+		}
 		return nsb;
 	}
-
+	
 	/**
 	 * This method adds the list of components to the tree model.
 	 * 
@@ -130,7 +99,7 @@ public class NavigationTree {
 		addListOfNamedSBaseToTreeModel(top,
 				createTreeNodeForName("Compartments"), compartmentList);
 	}
-
+	
 	/**
 	 * This method adds the list of species to the tree model.
 	 * @param top
@@ -141,7 +110,7 @@ public class NavigationTree {
 		addListOfNamedSBaseToTreeModel(top, createTreeNodeForName("Species"),
 				speciesList);
 	}
-
+	
 	/**
 	 * This methods adds the list of reactions to the tree model.
 	 * @param top
@@ -152,7 +121,7 @@ public class NavigationTree {
 		addListOfNamedSBaseToTreeModel(top, createTreeNodeForName("Reactions"),
 				reactionList);
 	}
-
+	
 	/**
 	 * This method adds the list of namedSbase to the tree model.
 	 * @param top
@@ -175,7 +144,7 @@ public class NavigationTree {
 			}
 		}
 	}
-
+	
 	/**
 	 * This method creates a tree node with the name which will be SBML model name in general.
 	 * 
@@ -185,7 +154,7 @@ public class NavigationTree {
 	private DefaultMutableTreeNode createTreeNodeForName(String name) {
 		return new DefaultMutableTreeNode(name, true);
 	}
-
+	
 	/**
 	 * This method gets the name of the model which is imported.
 	 * @param model
