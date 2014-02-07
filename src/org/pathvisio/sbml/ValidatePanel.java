@@ -36,6 +36,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.SimpleAttributeSet;
@@ -44,20 +45,26 @@ import javax.swing.text.StyledDocument;
 import javax.xml.stream.XMLStreamException;
 
 import org.pathvisio.core.debug.Logger;
+import org.pathvisio.core.util.ProgressKeeper;
+import org.pathvisio.gui.ProgressDialog;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.SBMLError;
 import org.sbml.jsbml.SBMLReader;
 
 /**
- * This class adds the validation functionality.It lets us validate the
- * selected SBML file.
+ * This class adds the validation functionality.It lets us validate the selected
+ * SBML file.
  * 
  * @author applecool
- *
+ * @author anwesha
+ * @version 1.0.0
+ * 
  */
 public class ValidatePanel extends JPanel {
 
 	SBMLPlugin plugin;
+	SBMLReader reader;
+	SBMLDocument document;
 	static Border etch = BorderFactory.createEtchedBorder();
 
 	private final JButton openButton;
@@ -245,68 +252,96 @@ public class ValidatePanel extends JPanel {
 	 */
 	@Override
 	public void validate() {
+		reader = new SBMLReader();
+		document = null;
 
-		String selectFile = ValidatePanel.modelFileName;
+		final String selectFile = ValidatePanel.modelFileName;
 
 		System.out.println("the file is " + selectFile);
-		SBMLReader reader = new SBMLReader();
-		SBMLDocument document = null;
 
-		long start, stop;
-		start = System.currentTimeMillis();
-		try {
-			document = reader.readSBML(selectFile);
-		} catch (XMLStreamException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		stop = System.currentTimeMillis();
+		System.currentTimeMillis();
+		final ProgressKeeper pk = new ProgressKeeper();
+		final ProgressDialog d = new ProgressDialog(
+				JOptionPane.getFrameForComponent(this), "", pk,
+				true, true);
+		SwingWorker<String, Void> sw = new SwingWorker<String, Void>() {
 
-		validationResultPane.setText("");
+			private long start;
+			private long stop;
 
-		if (document.getErrorCount() > 0) {
-			validationResultPane.setText("Encountered the following errors while reading the SBML file:\n");
-			document.printErrors(System.out);
-			validationResultPane.setText("\nFurther consistency checking and validation aborted.\n");
-		} else {
-			long errors = document.checkConsistency();
-			long size = new File(selectFile).length();
-			System.out.println("File Information: \n");
-			System.out.println("modelFileName: " + selectFile + "\n");
-			System.out.println("file size: " + size + "\n");
-			System.out.println("read time (ms): " + (stop - start) + "\n");
+			@Override
+			protected String doInBackground() throws Exception {
+				pk.setTaskName("Validating selected model");
+				start = System.currentTimeMillis();
+				try {
+					document = reader.readSBML(selectFile);
 
-			append("validation error(s): " + errors + "\n", Color.RED);
+					stop = System.currentTimeMillis();
 
-			if (errors > 0) {
+					validationResultPane.setText("");
+					System.out.println("errors" + document.getErrorCount());
 
-				append("\nFollowing errors were encountered while reading the SBML File:\n\n",
-						Color.BLACK);
-				for (int i = 0; i < errors; i++) {
-					String mainError = document.getError(i).toString();
-					SBMLError validationError = document.getError(i);
+					if (document.getErrorCount() > 0) {
+						validationResultPane.setText("Encountered the following errors while reading the SBML file:\n");
+						document.printErrors(System.out);
+						validationResultPane.setText("\nFurther consistency checking and validation aborted.\n");
+					} else {
+						long errors = document.checkConsistency();
+						long size = new File(selectFile).length();
 
-					append("" + validationError.getCategory(), Color.BLACK);
-					append(" (" + validationError.getSeverity() + ")" + "\n\n",
-							Color.BLACK);
-					append("" + validationError.getShortMessage() + "\n\n",
-							Color.BLACK);
-					append("Line:" + validationError.getLine(), Color.RED);
-					append("" + validationError.getMessage() + "\n\n",
-							Color.BLUE);
+						System.out.println("File Information: \n");
+						System.out.println("modelFileName: " + selectFile + "\n");
+						System.out.println("file size: " + size + "\n");
+						System.out.println("read time (ms): " + (stop - start) + "\n");
 
-					System.out.println("main error is :" + mainError);
+						append("validation error(s): " + errors + "\n", Color.RED);
 
+						if (errors > 0) {
+							append("\nFollowing errors were encountered while reading the SBML File:\n\n",
+									Color.BLACK);
+							for (int i = 0; i < errors; i++) {
+								String mainError = document.getError(i).toString();
+								SBMLError validationError = document.getError(i);
+								append("" + validationError.getCategory(), Color.BLACK);
+								append(" (" + validationError.getSeverity() + ")" + "\n\n",
+										Color.BLACK);
+								append("" + validationError.getShortMessage() + "\n\n",
+										Color.BLACK);
+								append("Line:" + validationError.getLine(), Color.RED);
+								append("" + validationError.getMessage() + "\n\n",
+										Color.BLUE);
+								System.out.println("main error is :" + mainError);
+							}
+						} else {
+							append("There are no errors in the file\n", Color.BLACK);
+						}
+
+					}
+				} catch (XMLStreamException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}finally {
+					pk.finished();
 				}
-			} else {
-
-				append("There are no errors in the file\n", Color.BLACK);
-
+				return "works";
 			}
-		}
+
+			@Override
+			protected void done() {
+				if (pk.isCancelled()) {
+					JOptionPane.showMessageDialog(null, "Validation cancelled");
+					pk.finished();
+				}
+			}
+		};
+
+		sw.execute();
+		d.setVisible(true);
 
 	}
+
+
 
 	/**
 	 * This method appends the error messages generated by the SBMLError in the validate
