@@ -2,23 +2,21 @@
 // a tool for data visualization and analysis using Biological Pathways
 // Copyright 2006-2009 BiGCaT Bioinformatics
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); 
-// you may not use this file except in compliance with the License. 
-// You may obtain a copy of the License at 
-// 
-// http://www.apache.org/licenses/LICENSE-2.0 
-//  
-// Unless required by applicable law or agreed to in writing, software 
-// distributed under the License is distributed on an "AS IS" BASIS, 
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-// See the License for the specific language governing permissions and 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
 // limitations under the License.
 //
 package org.pathvisio.sbml;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -59,28 +57,25 @@ import org.pathvisio.gui.ProgressDialog;
 
 import uk.ac.ebi.biomodels.ws.BioModelsWSClient;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
-import org.pathvisio.sbml.SBMLPlugin;
 /**
  * This class creates the search & browse panel for searching bio models and
- * content in the dialog of the Search.
- * This class enables us to search the bio models by various terms like
- * bio model name,publication title/id,person/encoder name,uniprot id,
- * go id and taxonomy id.
+ * content in the dialog of the Search. This class enables us to search the bio
+ * models by various terms like bio model name,publication
+ * title/id,person/encoder name,uniprot id, go id and taxonomy id.
+ * 
  * @author applecool
  * @author anwesha
+ * @version 1.0.0
  */
 public class BioModelPanel extends JPanel {
-	
+
 	SBMLPlugin plugin;
-	
-	public static Border etch = BorderFactory.createEtchedBorder();	
+
+	static Border etch = BorderFactory.createEtchedBorder();
 	private JComboBox clientDropdown;
 	private JTable resultTable;
 	private JScrollPane resultspane;
-	
+
 	private JRadioButton Browse;
 	private JRadioButton All;
 	private JRadioButton Curated;
@@ -89,18 +84,18 @@ public class BioModelPanel extends JPanel {
 	private JTextField bioModelName;
 	private JTextField pubTitId;
 	private JTextField chebiId;
-	private JTextField personName;	
+	private JTextField personName;
 	private JTextField uniprotId;
 	private JTextField goId;
 	private JTextField taxonomyId;
 	private JButton search;
-	
+
 	public BioModelPanel(final SBMLPlugin plugin) {
 
 		this.plugin = plugin;
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
-		
+
 		search= new JButton("search");
 		// biomodel radio buttons
 		Browse = new JRadioButton("Browse Biomodels");
@@ -108,16 +103,16 @@ public class BioModelPanel extends JPanel {
 		Curated = new JRadioButton("Curated Models");
 		NonCurated = new JRadioButton("Non-curated Models");
 		Search = new JRadioButton("Search Biomodels");
-		
+
 		ButtonGroup group1 = new ButtonGroup();
 		group1.add(Browse);
 		group1.add(Search);
-		
+
 		ButtonGroup group2 = new ButtonGroup();
 		group2.add(All);
 		group2.add(Curated);
 		group2.add(NonCurated);
-				
+
 		// biomodel search terms
 		bioModelName = new JTextField();
 		chebiId = new JTextField();
@@ -126,14 +121,14 @@ public class BioModelPanel extends JPanel {
 		personName = new JTextField();
 		goId = new JTextField();
 		taxonomyId = new JTextField();
-		
+
 		//tooltips for browse buttons and search choice button
 		All.setToolTipText("Browse all submitted models at Biomodels");
 		Curated.setToolTipText("Browse all curated models at Biomodels");
 		NonCurated.setToolTipText("Browse all non-curated models at Biomodels");
 		Search.setToolTipText("Choose to search for models in Biomodels");
 		Search.setToolTipText("Choose to browse models in Biomodels");
-					
+
 		//tooltips for all the search boxes
 		bioModelName.setToolTipText("Tip:Use Biomodel name (e.g.:'Tyson1991 - Cell Cycle 6 var')");
 		pubTitId.setToolTipText("Tip:Use publication name(e.g.:'sbml')");
@@ -142,35 +137,37 @@ public class BioModelPanel extends JPanel {
 		uniprotId.setToolTipText("Tip:Use Uniprot id (e.g.:'P04637','P10113')");
 		goId.setToolTipText("Tip:Use GO id (e.g.:'0006915')");
 		taxonomyId.setToolTipText("Tip:Use Taxonomy id (e.g.:'9606')");
-		
-		//search biomodel action 
+
+		// browse biomodel action
 		Action browseBioModelAction = new AbstractAction("browseBioModels") {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					resultspane.setBorder(BorderFactory.createTitledBorder(etch, "BioModels"));
 					browse(e.getActionCommand());
 				} catch (Exception ex) {
 					JOptionPane
-							.showMessageDialog(BioModelPanel.this,
-									ex.getMessage(), "Error",
-									JOptionPane.ERROR_MESSAGE);
+					.showMessageDialog(BioModelPanel.this,
+							ex.getMessage(), "Error",
+							JOptionPane.ERROR_MESSAGE);
 					Logger.log.error("Error while browsing Biomodels", ex);
 				}
 			}
 
 		};
-		
-		//search biomodel action 
+
+		//search biomodel action
 		Action searchBioModelAction = new AbstractAction("searchBioModels") {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
 					resultspane.setBorder(BorderFactory.createTitledBorder(etch, "BioModels"));
 					search();
 				} catch (Exception ex) {
 					JOptionPane
-							.showMessageDialog(BioModelPanel.this,
-									ex.getMessage(), "Error",
-									JOptionPane.ERROR_MESSAGE);
+					.showMessageDialog(BioModelPanel.this,
+							ex.getMessage(), "Error",
+							JOptionPane.ERROR_MESSAGE);
 					Logger.log.error("Error while searching for Biomodels", ex);
 				}
 			}
@@ -182,13 +179,13 @@ public class BioModelPanel extends JPanel {
 		GridBagConstraints ccf = new GridBagConstraints();
 
 		biomodelBox.setBorder(BorderFactory.createTitledBorder(etch));
-		
+
 		//layout for the browse box in the biomodel panel.
 		final JPanel browseOptBox = new JPanel(new GridBagLayout());
 		GridBagConstraints cc1 = new GridBagConstraints();
 
 		browseOptBox.setBorder(BorderFactory.createTitledBorder(etch,"Browse options"));
-				
+
 		//labels for all the search boxes.
 		cc1.fill = GridBagConstraints.BOTH;
 		cc1.gridx = 0;
@@ -197,7 +194,7 @@ public class BioModelPanel extends JPanel {
 		browseOptBox.add(All, cc1);
 		cc1.fill = GridBagConstraints.BOTH;
 		cc1.gridx = 0;
-		cc1.gridy = 4;	
+		cc1.gridy = 4;
 		cc1.weightx = 0.5;
 		browseOptBox.add(Curated, cc1);
 		cc1.fill = GridBagConstraints.BOTH;
@@ -205,12 +202,12 @@ public class BioModelPanel extends JPanel {
 		cc1.gridy = 6;
 		cc1.weightx = 0.5;
 		browseOptBox.add(NonCurated,cc1);
-				
+
 		final JPanel searchOptBox = new JPanel(new GridBagLayout());
 		GridBagConstraints cc2 = new GridBagConstraints();
 
 		searchOptBox.setBorder(BorderFactory.createTitledBorder(etch,"Search options"));
-		
+
 		//labels for all the search boxes.
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 0;
@@ -240,7 +237,7 @@ public class BioModelPanel extends JPanel {
 		cc2.gridx = 0;
 		cc2.gridy = 6;
 		searchOptBox.add(new JLabel("Taxonomy ID:"),cc2);
-				
+
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 0;
@@ -284,43 +281,46 @@ public class BioModelPanel extends JPanel {
 		cc2.insets = new Insets(10,0,0,0);  //top padding
 		searchOptBox.add(search,cc2);
 
-		
+
 		enableFrame(searchOptBox, false);
-		
+
 		//set action commands
 		All.setActionCommand("all");
 		Curated.setActionCommand("curated");
 		NonCurated.setActionCommand("noncurated");
-		
+
 		//add action listeners
 		Browse.addActionListener(new ActionListener() {
-	          public void actionPerformed(ActionEvent ae) {
-	        	 enableFrame(browseOptBox, true);
-	        	 enableFrame(searchOptBox, false);
-	          }
-	      });;
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				enableFrame(browseOptBox, true);
+				enableFrame(searchOptBox, false);
+			}
+		});
 		Browse.setSelected(true);
-	
+
 		All.addActionListener(browseBioModelAction);
 		Curated.addActionListener(browseBioModelAction);
 		NonCurated.addActionListener(browseBioModelAction);
-		
+
 		Search.addActionListener(new ActionListener() {
-		          public void actionPerformed(ActionEvent ae) {
-		        	  enableFrame(searchOptBox, true);
-		        	  enableFrame(browseOptBox, false);
-		          }
-		      });
-		
-		search.addActionListener(searchBioModelAction);		
-				
-				
+			@Override
+			public void actionPerformed(ActionEvent ae) {
+				enableFrame(searchOptBox, true);
+				enableFrame(browseOptBox, false);
+			}
+		});
+
+		search.addActionListener(searchBioModelAction);
+
+
 		Vector<String> clients = new Vector<String>(plugin.getClients().keySet());
 		Collections.sort(clients);
 
 		clientDropdown = new JComboBox(clients);
 		clientDropdown.setSelectedIndex(0);
 		clientDropdown.setRenderer(new DefaultListCellRenderer() {
+			@Override
 			public Component getListCellRendererComponent(final JList list,
 					final Object value, final int index,
 					final boolean isSelected, final boolean cellHasFocus) {
@@ -330,17 +330,18 @@ public class BioModelPanel extends JPanel {
 			}
 		});
 
-//		searchOptBox.add(clientDropdown, cc2.xy(6, 1));
+		//		searchOptBox.add(clientDropdown, cc2.xy(6, 1));
 
-		if (plugin.getClients().size() < 2)
+		if (plugin.getClients().size() < 2) {
 			clientDropdown.setVisible(false);
-	
+		}
+
 		ccf.fill = GridBagConstraints.BOTH;
 		ccf.gridx = 0;
 		ccf.gridy = 0;
 		ccf.weightx = 0.2;
 		ccf.anchor = GridBagConstraints.WEST;
-		ccf.insets = new Insets(5,0,5,0);  
+		ccf.insets = new Insets(5,0,5,0);
 		biomodelBox.add(Browse, ccf);
 		ccf.fill = GridBagConstraints.BOTH;
 		ccf.gridx = 0;
@@ -352,14 +353,14 @@ public class BioModelPanel extends JPanel {
 		ccf.gridy = 0;
 		ccf.weightx = 0.8;
 		ccf.anchor = GridBagConstraints.WEST;
-		ccf.insets = new Insets(5,0,5,0);  
+		ccf.insets = new Insets(5,0,5,0);
 		biomodelBox.add(Search, ccf);
 		ccf.fill = GridBagConstraints.BOTH;
 		ccf.gridx = 1;
 		ccf.gridy = 1;
 		ccf.weightx = 0.8;
 		biomodelBox.add(searchOptBox, ccf);
-		
+
 		c.fill = GridBagConstraints.BOTH;
 		c.gridx = 0;
 		c.gridy = 0;
@@ -372,10 +373,11 @@ public class BioModelPanel extends JPanel {
 		c.gridx = 0;
 		c.gridy = 1;
 		add(resultspane, c);
-		
-		//this enables us to import(open) the bio-models with two mouse clicks 
+
+		//this enables us to import(open) the bio-models with two mouse clicks
 		//on the results which appear in the result table.
 		resultTable.addMouseListener(new MouseAdapter() {
+			@Override
 			public void mouseClicked(MouseEvent e) {
 				//double click
 				if (e.getClickCount() == 2) {
@@ -403,7 +405,7 @@ public class BioModelPanel extends JPanel {
 			}
 		});
 	}
-	
+
 	/**
 	 * Browse method for - searching bio-models by name,publication title/id,
 	 * person/encoder name,uniprot id,go id and taxonomy id.
@@ -412,99 +414,101 @@ public class BioModelPanel extends JPanel {
 	 * @throws ExecutionException
 	 */
 	private void browse(final String command) throws RemoteException, InterruptedException,
-			ExecutionException {
-		
+	ExecutionException {
+
 		String clientName = clientDropdown.getSelectedItem().toString();
 		final BioModelsWSClient client = plugin.getClients().get(clientName);
 
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(
-			JOptionPane.getFrameForComponent(this), "", pk, true, true);
+				JOptionPane.getFrameForComponent(this), "", pk, true, true);
 		final ArrayList<String> results = new ArrayList<String>();
-			
+
 		SwingWorker<String[], Void> sw = new SwingWorker<String[], Void>() {
-				
-		protected String[] doInBackground() throws Exception {
-			pk.setTaskName("Browse Biomodels");
-			String[] results1 = null;
-			String[] results2 = null;
-			String[] results3 = null;
-			
-			try {
-				if(command.equalsIgnoreCase("all")){
-					
-					results1 = client.getAllModelsId();
-									
-					if(results1!=null){
-					 for (int i = 0; i < results1.length; i++) {
-							
-							results.add(results1[i]);
+
+			@Override
+			protected String[] doInBackground() throws Exception {
+				pk.setTaskName("Browse Biomodels");
+				String[] results1 = null;
+				String[] results2 = null;
+				String[] results3 = null;
+
+				try {
+					if(command.equalsIgnoreCase("all")){
+
+						results1 = client.getAllModelsId();
+
+						if(results1!=null){
+							for (String element : results1) {
+
+								results.add(element);
+							}
 						}
 					}
-				}
-				if(command.equalsIgnoreCase("curated")){
-					
-					results2 = client.getAllCuratedModelsId();
-									
-					if(results2!=null){
-					 for (int i = 0; i < results2.length; i++) {
-							
-							results.add(results2[i]);
+					if(command.equalsIgnoreCase("curated")){
+
+						results2 = client.getAllCuratedModelsId();
+
+						if(results2!=null){
+							for (String element : results2) {
+
+								results.add(element);
+							}
 						}
 					}
-				}
-				if(command.equalsIgnoreCase("noncurated")){
-					
-					results3 = client.getAllNonCuratedModelsId();
-									
-					if(results3!=null){
-					 for (int i = 0; i < results3.length; i++) {
-							
-							results.add(results3[i]);
+					if(command.equalsIgnoreCase("noncurated")){
+
+						results3 = client.getAllNonCuratedModelsId();
+
+						if(results3!=null){
+							for (String element : results3) {
+
+								results.add(element);
+							}
 						}
 					}
+
+				} catch (Exception e) {
+					throw e;
+				} finally {
+					pk.finished();
 				}
 
-					} catch (Exception e) {
-						throw e;
-					} finally {
-						pk.finished();
+
+				String[] finalresults = new String[results.size()];
+
+				results.toArray(finalresults);
+
+				return finalresults;
+
+
+			}
+
+			@Override
+			protected void done() {
+				if(!pk.isCancelled())
+				{
+					if(results.size()==0)
+					{
+						JOptionPane.showMessageDialog(null,"0 results found");
 					}
-					
-					
-					String[] finalresults = new String[results.size()];
-					 
-					results.toArray(finalresults);
-						
-					return finalresults;
-					
-					
 				}
-				  
-				 protected void done() {
-			           if(!pk.isCancelled())
-			             {
-			              if(results.size()==0)
-			              {
-			                 JOptionPane.showMessageDialog(null,"0 results found");
-			              }
-			             }
-			             else if(pk.isCancelled())
-			             {
-			               pk.finished();
-			             }
-			           }          
-			};
+				else if(pk.isCancelled())
+				{
+					pk.finished();
+				}
+			}
+		};
 
-			sw.execute();
-			d.setVisible(true);
+		sw.execute();
+		d.setVisible(true);
 
-			resultTable.setModel(new ResultTableModel(sw.get(), clientName));
-			resultTable
-					.setRowSorter(new TableRowSorter(resultTable.getModel()));
+		resultTable.setModel(new ResultTableModel(sw.get(), clientName));
+		resultTable
+		.setRowSorter(new TableRowSorter(resultTable.getModel()));
 	}
-	
-	
+
+
 	/**
 	 * Search method for - searching bio-models by name,publication title/id,
 	 * person/encoder name,uniprot id,go id and taxonomy id.
@@ -513,8 +517,8 @@ public class BioModelPanel extends JPanel {
 	 * @throws ExecutionException
 	 */
 	private void search() throws RemoteException, InterruptedException,
-			ExecutionException {
-		
+	ExecutionException {
+
 		// search terms typed in the search boxes are trimmed and stored in the following respective variables.
 		final String sbmlName = bioModelName.getText().trim();
 		final String sbmlPub = pubTitId.getText().trim();
@@ -523,7 +527,7 @@ public class BioModelPanel extends JPanel {
 		final String sbmlUniprot = uniprotId.getText().trim();
 		final String sbmlGo = goId.getText().trim();
 		final String sbmlTaxonomy = taxonomyId.getText().trim();
-		
+
 		if (!(sbmlPub.isEmpty()&&sbmlName.isEmpty()&&sbmlChebi.isEmpty()&&sbmlPerson.isEmpty()&&sbmlUniprot.isEmpty()&&sbmlGo.isEmpty()&&sbmlTaxonomy.isEmpty())) {
 			String clientName = clientDropdown.getSelectedItem().toString();
 			final BioModelsWSClient client = plugin.getClients().get(clientName);
@@ -532,9 +536,10 @@ public class BioModelPanel extends JPanel {
 			final ProgressDialog d = new ProgressDialog(
 					JOptionPane.getFrameForComponent(this), "", pk, true, true);
 			final ArrayList<String> results = new ArrayList<String>();
-			
+
 			SwingWorker<String[], Void> sw = new SwingWorker<String[], Void>() {
-				
+
+				@Override
 				protected String[] doInBackground() throws Exception {
 					pk.setTaskName("Searching Biomodels");
 					String[] results1 = null;
@@ -548,88 +553,88 @@ public class BioModelPanel extends JPanel {
 						// getting the models id by name.
 						if(!bioModelName.getText().equalsIgnoreCase(""))
 						{
-						results1 = client.getModelsIdByName(sbmlName);
-						
-						if(results1!=null){
-						 for (int i = 0; i < results1.length; i++) {
-								
-								results.add(results1[i]);
+							results1 = client.getModelsIdByName(sbmlName);
+
+							if(results1!=null){
+								for (String element : results1) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting the models id by publication title or id.
 						if(!pubTitId.getText().equalsIgnoreCase(""))
 						{
-						results2= client.getModelsIdByPublication(sbmlPub);
-						if(results2!=null){ 
-						for (int i = 0; i < results2.length; i++) {
-								
-								results.add(results2[i]);
+							results2= client.getModelsIdByPublication(sbmlPub);
+							if(results2!=null){
+								for (String element : results2) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting models id by chebi id.
 						if(!chebiId.getText().equalsIgnoreCase(""))
 						{
-						results3= client.getModelsIdByChEBIId(sbmlChebi);
-						if(results3!=null){
-						for (int i = 0; i < results3.length; i++) {
-								
-								results.add(results3[i]);
+							results3= client.getModelsIdByChEBIId(sbmlChebi);
+							if(results3!=null){
+								for (String element : results3) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting models id by person or encoder or author name.
 						if(!personName.getText().equalsIgnoreCase(""))
 						{
-						results4= client.getModelsIdByPerson(sbmlPerson);
-						if(results4!=null){ 
-						for (int i = 0; i < results4.length; i++) {
-								
-								results.add(results4[i]);
+							results4= client.getModelsIdByPerson(sbmlPerson);
+							if(results4!=null){
+								for (String element : results4) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting models id by uniprot id.
 						if(!uniprotId.getText().equalsIgnoreCase(""))
 						{
-						results5= client.getModelsIdByUniprot(sbmlUniprot);
-						if(results5!=null){ 
-						for (int i = 0; i < results5.length; i++) {
-								
-								results.add(results5[i]);
+							results5= client.getModelsIdByUniprot(sbmlUniprot);
+							if(results5!=null){
+								for (String element : results5) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting models id by go id.
 						if(!goId.getText().equalsIgnoreCase(""))
 						{
-						results6 = client.getModelsIdByGOId(sbmlGo);
-						
-						if(results6!=null){
-						 for (int i = 0; i < results6.length; i++) {
-								
-								results.add(results6[i]);
+							results6 = client.getModelsIdByGOId(sbmlGo);
+
+							if(results6!=null){
+								for (String element : results6) {
+
+									results.add(element);
+								}
 							}
 						}
-						}
-						
+
 						//getting models id by taxonomy id.
 						if(!taxonomyId.getText().equalsIgnoreCase(""))
 						{
-						results7 = client.getModelsIdByTaxonomyId(sbmlTaxonomy);
-						
-						if(results7!=null){
-						 for (int i = 0; i < results7.length; i++) {
-								
-								results.add(results7[i]);
+							results7 = client.getModelsIdByTaxonomyId(sbmlTaxonomy);
+
+							if(results7!=null){
+								for (String element : results7) {
+
+									results.add(element);
+								}
 							}
-						}
 						}
 
 					} catch (Exception e) {
@@ -637,30 +642,31 @@ public class BioModelPanel extends JPanel {
 					} finally {
 						pk.finished();
 					}
-					
-					
-					 String[] finalresults = new String[results.size()];
-					 
-						results.toArray(finalresults);
-						
+
+
+					String[] finalresults = new String[results.size()];
+
+					results.toArray(finalresults);
+
 					return finalresults;
-					
-					
+
+
 				}
-				  
-				 protected void done() {
-			           if(!pk.isCancelled())
-			             {
-			              if(results.size()==0)
-			              {
-			                 JOptionPane.showMessageDialog(null,"0 results found");
-			              }
-			             }
-			             else if(pk.isCancelled())
-			             {
-			               pk.finished();
-			             }
-			           }          
+
+				@Override
+				protected void done() {
+					if(!pk.isCancelled())
+					{
+						if(results.size()==0)
+						{
+							JOptionPane.showMessageDialog(null,"0 results found");
+						}
+					}
+					else if(pk.isCancelled())
+					{
+						pk.finished();
+					}
+				}
 			};
 
 			sw.execute();
@@ -668,13 +674,13 @@ public class BioModelPanel extends JPanel {
 
 			resultTable.setModel(new ResultTableModel(sw.get(), clientName));
 			resultTable
-					.setRowSorter(new TableRowSorter(resultTable.getModel()));
+			.setRowSorter(new TableRowSorter(resultTable.getModel()));
 		} else {
 			JOptionPane.showMessageDialog(null, "Please Enter a Search Query",
 					"ERROR", JOptionPane.ERROR_MESSAGE);
 		}
 	}
-	
+
 	//enable search
 	private void enableFrame(JPanel container, boolean enable) {
 		Component[] components = container.getComponents();
@@ -702,20 +708,24 @@ public class BioModelPanel extends JPanel {
 
 		}
 
+		@Override
 		public int getColumnCount() {
 			return 1;
 		}
 
+		@Override
 		public int getRowCount() {
 			return results.length;
 		}
 
+		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			String r = results[rowIndex];
 
 			return r;
 		}
 
+		@Override
 		public String getColumnName(int column) {
 			return columnNames[column];
 		}

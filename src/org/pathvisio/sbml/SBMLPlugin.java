@@ -2,16 +2,16 @@
 // a tool for data visualization and analysis using Biological Pathways
 // Copyright 2006-2009 BiGCaT Bioinformatics
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); 
-// you may not use this file except in compliance with the License. 
-// You may obtain a copy of the License at 
-// 
-// http://www.apache.org/licenses/LICENSE-2.0 
-//  
-// Unless required by applicable law or agreed to in writing, software 
-// distributed under the License is distributed on an "AS IS" BASIS, 
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-// See the License for the specific language governing permissions and 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
 // limitations under the License.
 //
 package org.pathvisio.sbml;
@@ -62,11 +62,6 @@ import uk.ac.ebi.biomodels.ws.BioModelsWSException;
 public class SBMLPlugin implements Plugin {
 	private class BioModelsAction extends AbstractAction {
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
 		BioModelsAction() {
 			putValue(NAME, "Biomodels");
 		}
@@ -82,7 +77,7 @@ public class SBMLPlugin implements Plugin {
 			d.setVisible(true);
 			d.setResizable(false);
 			// loading dialog at the centre of the frame
-			d.setLocationRelativeTo(desktop.getSwingEngine().getFrame());
+			d.setLocationRelativeTo(desktop.getFrame());
 			d.setVisible(true);
 		}
 
@@ -110,7 +105,6 @@ public class SBMLPlugin implements Plugin {
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			// new FruchtRein(desktop.getSwingEngine());
 			new Prefuse(desktop.getSwingEngine(), false);
 		}
 
@@ -119,7 +113,7 @@ public class SBMLPlugin implements Plugin {
 	public static enum PlPreference implements Preference {
 		PL_LAYOUT_FR_ATTRACTION("0.5"), PL_LAYOUT_FR_REPULSION("1"), PL_LAYOUT_SPRING_FORCE(
 				"0.33"), PL_LAYOUT_SPRING_REPULSION("100"), PL_LAYOUT_SPRING_STRETCH(
-				"0.7");
+						"0.7");
 
 		private final String defaultVal;
 
@@ -142,23 +136,20 @@ public class SBMLPlugin implements Plugin {
 	 * @author applecool
 	 * 
 	 */
-	private class ValidateToolBarAction extends AbstractAction {
+	private class ValidateAction extends AbstractAction {
 
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		ValidateToolBarAction() {
+		ValidateAction() {
 			putValue(NAME, "Validate");
 		}
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			ValidatePanel vp = new ValidatePanel();
+			System.out.println("here");
+			ValidatePanel vp = new ValidatePanel(SBMLPlugin.this);
 			JDialog d = new JDialog(desktop.getFrame(), "Validate");
 			d.getContentPane().add(vp);
 			d.pack();
+			d.setLocationRelativeTo(desktop.getFrame());
 			d.setVisible(true);
 
 		}
@@ -182,18 +173,18 @@ public class SBMLPlugin implements Plugin {
 	private JMenuItem layout;
 
 	private JMenuItem validate;
-	private SBMLDocument lastImported = null;
+
 	Component sbmlPanel;
 
-	private File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
+	private final File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
 
-	private final ValidateToolBarAction validateAction = new ValidateToolBarAction();
+	private final ValidateAction validateAction = new ValidateAction();
 
 	private final FRLayoutAction layoutAction = new FRLayoutAction();
 
 	private final BioModelsAction biomodelAction = new BioModelsAction();
 
-	private Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
+	private final Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
 
 	public void createSbmlMenu() {
 
@@ -201,7 +192,7 @@ public class SBMLPlugin implements Plugin {
 
 		biomodels = new JMenuItem("Biomodel Import");
 		layout = new JMenuItem("Force Directed Layout");
-		validate = new JMenuItem("Validate Model");
+		validate = new JMenuItem("Validate");
 
 		biomodels.addActionListener(biomodelAction);
 		layout.addActionListener(layoutAction);
@@ -217,11 +208,11 @@ public class SBMLPlugin implements Plugin {
 	@Override
 	public void done() {
 		desktop.getSideBarTabbedPane().remove(sbmlPanel);
-		
+
 		desktop.unregisterSubMenu("Plugins", sbmlmenu);
-        if(tmpDir.exists()) {
-                tmpDir.delete();
-        }
+		if(tmpDir.exists()) {
+			tmpDir.delete();
+		}
 	}
 
 	public Map<String, BioModelsWSClient> getClients() {
@@ -237,7 +228,7 @@ public class SBMLPlugin implements Plugin {
 		try {
 			tmpDir.mkdirs();
 			loadClient();
-			
+
 			// save the desktop reference so we can use it later
 			this.desktop = desktop;
 
@@ -248,7 +239,7 @@ public class SBMLPlugin implements Plugin {
 
 			// register menu items
 			createSbmlMenu();
-			
+
 			// add new SBML side pane
 			DocumentPanel pane = new DocumentPanel(desktop.getSwingEngine());
 			JTabbedPane sidebarTabbedPane = desktop.getSideBarTabbedPane();
@@ -256,8 +247,8 @@ public class SBMLPlugin implements Plugin {
 
 			// add functionality to the pane
 			desktop.getSwingEngine().getEngine()
-					.addApplicationEventListener(pane);
-			
+			.addApplicationEventListener(pane);
+
 		} catch (Exception e) {
 			Logger.log.error("Error while initializing ", e);
 			JOptionPane.showMessageDialog(desktop.getSwingEngine()
@@ -267,7 +258,7 @@ public class SBMLPlugin implements Plugin {
 	}
 
 	private void loadClient() throws MalformedURLException, ServiceException,
-			BioModelsWSException {
+	BioModelsWSException {
 		BioModelsWSClient client = new BioModelsWSClient();
 		clients.put(
 				"http://www.ebi.ac.uk/biomodels-main/services/BioModelsWebServices?wsdl",
@@ -301,7 +292,6 @@ public class SBMLPlugin implements Plugin {
 			engine.openPathway(tmp2);
 
 		} catch (XMLStreamException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -309,7 +299,7 @@ public class SBMLPlugin implements Plugin {
 
 	public void openPathwayWithProgress(final BioModelsWSClient client,
 			final String id, final int rev, final File tmpDir)
-			throws InterruptedException, ExecutionException {
+					throws InterruptedException, ExecutionException {
 		final ProgressKeeper pk = new ProgressKeeper();
 		final ProgressDialog d = new ProgressDialog(
 				JOptionPane.getFrameForComponent(desktop.getSwingEngine()
@@ -346,7 +336,6 @@ public class SBMLPlugin implements Plugin {
 	 * @param document
 	 */
 	public void setLastImported(SBMLDocument document) {
-		lastImported = document;
 
 	}
 

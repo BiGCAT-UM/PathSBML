@@ -30,7 +30,7 @@ public abstract class LayoutAbstract {
 	List<PathwayElement> pwyNodes;
 	List<PathwayElement> pwyLines;
 	List<PathwayElement> pwyStates;
-	
+
 	LayoutAbstract(SwingEngine se){
 		this(se,false);
 	}
@@ -42,7 +42,7 @@ public abstract class LayoutAbstract {
 		pwyNodes = new ArrayList<PathwayElement>();
 		pwyLines = new ArrayList<PathwayElement>();
 		pwyStates = new ArrayList<PathwayElement>();
-	
+
 		if (selection){
 			List<Graphics> graphics = vpwy.getSelectedGraphics();
 			for (Graphics g : graphics){
@@ -51,11 +51,11 @@ public abstract class LayoutAbstract {
 					pwyNodes.add(pe);
 				}
 				else if (pe.getObjectType().equals(ObjectType.LINE)){
-					if ("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT)))
-		
-					pwyStates.add(pe);
-					
-					else  pwyLines.add(pe);
+					if ("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT))) {
+						pwyStates.add(pe);
+					} else {
+						pwyLines.add(pe);
+					}
 				}
 			}
 		}
@@ -65,11 +65,11 @@ public abstract class LayoutAbstract {
 					pwyNodes.add(pe);
 				}
 				else if (pe.getObjectType().equals(ObjectType.LINE)){
-					if ("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT)))
-		
-					pwyStates.add(pe);
-					
-					else  pwyLines.add(pe);
+					if ("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT))) {
+						pwyStates.add(pe);
+					} else {
+						pwyLines.add(pe);
+					}
 				}
 			}
 		}
@@ -83,7 +83,7 @@ public abstract class LayoutAbstract {
 			}
 		}
 	}
-	
+
 	protected void setLocations(Map<String,Point2D> points){
 		double plusx = 0;
 		if (selection){
@@ -135,20 +135,20 @@ public abstract class LayoutAbstract {
 			}
 		}
 	}
-	
+
 	protected void drawLines(){
 		for (PathwayElement line : pwy.getDataObjects())
 			if (line.getObjectType().equals(ObjectType.LINE)){
 				PathwayElement startNode = pwy.getElementById(line.getStartGraphRef());
 				PathwayElement endNode = pwy.getElementById(line.getEndGraphRef());
-				
+
 				line.getMStart().unlink();
 				line.getMEnd().unlink();
 				double differenceX;
 				double differenceY;
 				boolean startBiggerX = true;
 				boolean startBiggerY = true;
-				
+
 				if (startNode.getMCenterX() < endNode.getMCenterX()){
 					double endSide = endNode.getMCenterX() - endNode.getMWidth()/2;
 					double startSide = startNode.getMCenterX() + startNode.getMWidth()/2;
@@ -171,7 +171,7 @@ public abstract class LayoutAbstract {
 					double endSide = endNode.getMCenterY() + endNode.getMHeight()/2;
 					differenceY = startSide - endSide;
 				}
-				
+
 				if (differenceX>differenceY && startBiggerX) {
 					line.setMStartY(startNode.getMCenterY());
 					line.setMStartX(startNode.getMCenterX() - startNode.getMWidth() / 2);
@@ -202,95 +202,97 @@ public abstract class LayoutAbstract {
 			if (pe.getObjectType().equals(ObjectType.LINE) ){
 				if (!("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT))))
 				{
-				if(pe.getEndGraphRef().equalsIgnoreCase(graphId))
-					return pe.getStartGraphRef();
-				
-				if(pe.getStartGraphRef().equalsIgnoreCase(graphId))
-				
-					return pe.getEndGraphRef();
+					if(pe.getEndGraphRef().equalsIgnoreCase(graphId))
+						return pe.getStartGraphRef();
+
+					if(pe.getStartGraphRef().equalsIgnoreCase(graphId))
+
+						return pe.getEndGraphRef();
 				}
 			}
 		}
 		return "";
-		}
-		
+	}
+
 	protected String getReaction(String graphId) {
 		for (PathwayElement pe : pwy.getDataObjects()){
 			if (pe.getObjectType().equals(ObjectType.LINE) ){
+				System.out.println(pe
+						.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT));
 				if (("true".equals (pe.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT))))
 				{
-				if(pe.getMAnchors().get(0).getGraphId().equalsIgnoreCase(graphId))
-					return pe.getStartGraphRef();
-				
-				
+					if(pe.getMAnchors().get(0).getGraphId().equalsIgnoreCase(graphId))
+						return pe.getStartGraphRef();
+
+
 				}
 			}
 		}
 		return "";
-		}
-	
+	}
+
 	protected void drawStates(){
 		for (PathwayElement line : pwy.getDataObjects())
 			if (line.getObjectType().equals(ObjectType.LINE)){
 				if ("true".equals (line.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_IS_PORT)))
 				{
-				PathwayElement startNode = pwy.getElementById(line.getStartGraphRef());
-				PathwayElement endNode = pwy.getElementById(getSpecies(line.getMAnchors().get(0).getGraphId()));
-				
-				line.getMStart().unlink();
-				line.getMEnd().unlink();
-				double differenceX;
-				double differenceY;
-				boolean startBiggerX = true;
-				boolean startBiggerY = true;
-				
-				if (startNode.getMCenterX() < endNode.getMCenterX()){
-					double endSide = endNode.getMCenterX() - endNode.getMWidth()/2;
-					double startSide = startNode.getMCenterX() + startNode.getMWidth()/2;
-					differenceX = endSide - startSide;
-					startBiggerX = false;
+					PathwayElement startNode = pwy.getElementById(line.getStartGraphRef());
+					PathwayElement endNode = pwy.getElementById(getSpecies(line.getMAnchors().get(0).getGraphId()));
+
+					line.getMStart().unlink();
+					line.getMEnd().unlink();
+					double differenceX;
+					double differenceY;
+					boolean startBiggerX = true;
+					boolean startBiggerY = true;
+
+					if (startNode.getMCenterX() < endNode.getMCenterX()){
+						double endSide = endNode.getMCenterX() - endNode.getMWidth()/2;
+						double startSide = startNode.getMCenterX() + startNode.getMWidth()/2;
+						differenceX = endSide - startSide;
+						startBiggerX = false;
+					}
+					else {
+						double startSide = startNode.getMCenterX() - startNode.getMWidth()/2;
+						double endSide = endNode.getMCenterX() + endNode.getMWidth()/2;
+						differenceX = startSide - endSide;
+					}
+					if (startNode.getMCenterY() < endNode.getMCenterY()){
+						double startSide = startNode.getMCenterY() + startNode.getMHeight()/2;
+						double endSide = endNode.getMCenterY() - endNode.getMHeight()/2;
+						differenceY = endSide - startSide;
+						startBiggerY = false;
+					}
+					else {
+						double startSide = startNode.getMCenterY() - startNode.getMHeight()/2;
+						double endSide = endNode.getMCenterY() + endNode.getMHeight()/2;
+						differenceY = startSide - endSide;
+					}
+
+					if (differenceX>differenceY && startBiggerX) {
+						line.setMStartY(startNode.getMCenterY());
+						line.setMStartX(startNode.getMCenterX() - startNode.getMWidth() / 2);
+						line.setMEndY(endNode.getMCenterY());
+						line.setMEndX(endNode.getMCenterX() + endNode.getMWidth() / 2);
+					} else if (differenceX>differenceY && !startBiggerX) {
+						line.setMStartY(startNode.getMCenterY());
+						line.setMStartX(startNode.getMCenterX() + startNode.getMWidth() / 2);
+						line.setMEndY(endNode.getMCenterY());
+						line.setMEndX(endNode.getMCenterX() - endNode.getMWidth() / 2);
+					} else if (differenceX<differenceY && startBiggerY){
+						line.setMStartX(startNode.getMCenterX());
+						line.setMStartY((startNode.getMCenterY() - startNode.getMHeight() /2));
+						line.setMEndX(endNode.getMCenterX());
+						line.setMEndY(endNode.getMCenterY() + startNode.getMHeight() /2);
+					} else {
+						line.setMStartX(startNode.getMCenterX());
+						line.setMStartY(startNode.getMCenterY() + startNode.getMHeight() / 2);
+						line.setMEndX(endNode.getMCenterX());
+						line.setMEndY(endNode.getMCenterY() - endNode.getMHeight() / 2);
+					}
+					line.getMStart().linkTo(startNode);
+					line.getMEnd().linkTo(endNode);
 				}
-				else {
-					double startSide = startNode.getMCenterX() - startNode.getMWidth()/2;
-					double endSide = endNode.getMCenterX() + endNode.getMWidth()/2;
-					differenceX = startSide - endSide;
-				}
-				if (startNode.getMCenterY() < endNode.getMCenterY()){
-					double startSide = startNode.getMCenterY() + startNode.getMHeight()/2;
-					double endSide = endNode.getMCenterY() - endNode.getMHeight()/2;
-					differenceY = endSide - startSide;
-					startBiggerY = false;
-				}
-				else {
-					double startSide = startNode.getMCenterY() - startNode.getMHeight()/2;
-					double endSide = endNode.getMCenterY() + endNode.getMHeight()/2;
-					differenceY = startSide - endSide;
-				}
-				
-				if (differenceX>differenceY && startBiggerX) {
-					line.setMStartY(startNode.getMCenterY());
-					line.setMStartX(startNode.getMCenterX() - startNode.getMWidth() / 2);
-					line.setMEndY(endNode.getMCenterY());
-					line.setMEndX(endNode.getMCenterX() + endNode.getMWidth() / 2);
-				} else if (differenceX>differenceY && !startBiggerX) {
-					line.setMStartY(startNode.getMCenterY());
-					line.setMStartX(startNode.getMCenterX() + startNode.getMWidth() / 2);
-					line.setMEndY(endNode.getMCenterY());
-					line.setMEndX(endNode.getMCenterX() - endNode.getMWidth() / 2);
-				} else if (differenceX<differenceY && startBiggerY){
-					line.setMStartX(startNode.getMCenterX());
-					line.setMStartY((startNode.getMCenterY() - startNode.getMHeight() /2));
-					line.setMEndX(endNode.getMCenterX());
-					line.setMEndY(endNode.getMCenterY() + startNode.getMHeight() /2);
-				} else {
-					line.setMStartX(startNode.getMCenterX());
-					line.setMStartY(startNode.getMCenterY() + startNode.getMHeight() / 2);
-					line.setMEndX(endNode.getMCenterX());
-					line.setMEndY(endNode.getMCenterY() - endNode.getMHeight() / 2);
-				}
-				line.getMStart().linkTo(startNode);
-				line.getMEnd().linkTo(endNode);
-			}
 			}
 	}
 }
