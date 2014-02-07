@@ -1,17 +1,17 @@
 // PathVisio,
 // a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2009 BiGCaT Bioinformatics
+// Copyright 2006-2014 BiGCaT Bioinformatics
 //
-// Licensed under the Apache License, Version 2.0 (the "License"); 
-// you may not use this file except in compliance with the License. 
-// You may obtain a copy of the License at 
-// 
-// http://www.apache.org/licenses/LICENSE-2.0 
-//  
-// Unless required by applicable law or agreed to in writing, software 
-// distributed under the License is distributed on an "AS IS" BASIS, 
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
-// See the License for the specific language governing permissions and 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
 // limitations under the License.
 //
 package org.pathvisio.sbml.peer;
@@ -20,11 +20,10 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
+import org.pathvisio.core.model.DataNodeType;
 import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
@@ -58,19 +57,18 @@ public class PeerModel implements PathwayListener
 	private final SBMLDocument doc;
 	private final Pathway pwy;
 
-	private boolean updatingPathway = false;
 	private boolean updatingSbml = false;
-	
+
 	public PeerModel (SBMLDocument doc, Pathway pwy)
 	{
 		this.doc = doc;
 		this.pwy = pwy;
 		pwy.addListener(this);
 	}
-	
+
 	public Pathway getPathway() { return pwy; }
 	public SBMLDocument getDoc() { return doc; }
-	
+
 	public void addElement(PathwayElement elt)
 	{
 		String sbgnClass = elt.getDynamicProperty(SbgnFormat.PROPERTY_SBGN_CLASS);
@@ -113,12 +111,12 @@ public class PeerModel implements PathwayListener
 		{
 			// we only handle SBGN elements for now.
 		}
-		
+
 	}
-	
+
 	private void addSpeciesReference(PathwayElement elt)
 	{
-		
+
 	}
 
 	private void addSpecies(PathwayElement elt, GlyphClazz gc)
@@ -132,7 +130,7 @@ public class PeerModel implements PathwayListener
 
 	}
 
-	private Map<String, PeerSpecies> speciesPeers = new HashMap<String, PeerSpecies>();
+	private final Map<String, PeerSpecies> speciesPeers = new HashMap<String, PeerSpecies>();
 
 	public void putSpeciesPeer(String sId, PeerSpecies sbr)
 	{
@@ -167,7 +165,7 @@ public class PeerModel implements PathwayListener
 	private void removeElement(PathwayElement affectedData)
 	{
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public static PeerModel createFromDoc(SBMLDocument doc, File file)
@@ -175,17 +173,17 @@ public class PeerModel implements PathwayListener
 		Pathway pathway = new Pathway();
 		pathway.getMappInfo().setMapInfoName(file.getName());
 		pathway.getMappInfo().setMapInfoDataSource("Converted from SBML");
-		PeerModel bm = new PeerModel (doc, pathway);		
+		PeerModel bm = new PeerModel (doc, pathway);
 		bm.updateModel();
 		return bm;
 	}
-	
+
 	private void updateModel()
 	{
 		updatingSbml = true;
 		doReactions();
 		doSpecies();
-		
+
 		doQual();
 		doLayout();
 		updatingSbml = false;
@@ -194,7 +192,7 @@ public class PeerModel implements PathwayListener
 	private void doSpecies()
 	{
 		// do remaining species
-		
+
 		for (Species s : doc.getModel().getListOfSpecies())
 		{
 			// check it it was already added before
@@ -206,12 +204,12 @@ public class PeerModel implements PathwayListener
 			}
 		}
 	}
-	
+
 	/** checks if the given SBML document uses the SBML-layout extension */
 	private void doLayout()
 	{
 		Model model = doc.getModel();
-		ExtendedLayoutModel sbase = (ExtendedLayoutModel)model.getExtension(LayoutConstants.namespaceURI);	
+		ExtendedLayoutModel sbase = (ExtendedLayoutModel)model.getExtension(LayoutConstants.namespaceURI);
 		if (sbase != null)
 		{
 			for (Layout l : sbase.getListOfLayouts())
@@ -221,12 +219,14 @@ public class PeerModel implements PathwayListener
 				{
 					String sid = g.getSpecies();
 					PeerSpecies sbr = getSpeciesPeer(sid);
-					if (sbr != null) sbr.setSpeciesGlyph(g);
+					if (sbr != null) {
+						sbr.setSpeciesGlyph(g);
+					}
 				}
 			}
-		}		
+		}
 	}
-	
+
 	/** checks if the given SBML document uses the SBML-qual extension */
 	private void doQual()
 	{
@@ -236,27 +236,27 @@ public class PeerModel implements PathwayListener
 		{
 			doQualitativeSpecies(qualModel);
 			doTransitions(qualModel);
-		}		
+		}
 	}
-	
+
 
 	/** used only in the SBML-qual extension */
 	private void doQualitativeSpecies(QualitativeModel qualModel)
 	{
 		for (QualitativeSpecies qs : qualModel.getListOfQualitativeSpecies())
 		{
-//			PathwayElement pelt = createOrGetSpecies(qs.getId(), xco, yco, GlyphClazz.BIOLOGICAL_ACTIVITY);
+			//			PathwayElement pelt = createOrGetSpecies(qs.getId(), xco, yco, GlyphClazz.BIOLOGICAL_ACTIVITY);
 			PathwayElement pelt = SbgnTemplates.createGlyph(GlyphClazz.BIOLOGICAL_ACTIVITY, pwy, xco, yco);
 			pelt.setGraphId(qs.getId());
 			pelt.setTextLabel(qs.getName());
-			
+
 			List<String> t = qs.filterCVTerms(CVTerm.Qualifier.BQB_IS, "miriam");
 			if (t.size() > 0)
 			{
 				Xref ref = Xref.fromUrn(t.get(0));
 				if (ref == null)
 				{
-					System.out.println ("WARNING: couldn't convert " + t.get(0) + " to Xref");	
+					System.out.println ("WARNING: couldn't convert " + t.get(0) + " to Xref");
 				}
 				else
 				{
@@ -264,27 +264,27 @@ public class PeerModel implements PathwayListener
 					pelt.setDataSource(ref.getDataSource());
 				}
 			}
-			
+
 			pwy.add(pelt);
-			
+
 			nextLocation();
 		}
 	}
-	
+
 	/** used only in the SBML-qual extension */
 	private void doTransitions(QualitativeModel qualModel)
-	{			
+	{
 		for (Transition t : qualModel.getListOfTransitions())
 		{
 			if (t.getListOfInputs().size() == 1 &&
-				t.getListOfOutputs().size() == 1)
+					t.getListOfOutputs().size() == 1)
 			{
 				Input i = t.getListOfInputs().get(0);
 				Output o = t.getListOfOutputs().get(0);
-				
+
 				PathwayElement iElt = pwy.getElementById(i.getQualitativeSpecies());
 				PathwayElement oElt = pwy.getElementById(o.getQualitativeSpecies());
-				
+
 				if (iElt == null || oElt == null)
 				{
 					System.out.println ("WARNING: missing input or output qualitative species");
@@ -307,9 +307,9 @@ public class PeerModel implements PathwayListener
 			{
 				//TODO more complex transition functions.
 			}
-		}	
+		}
 	}
-	
+
 	private void doReactions()
 	{
 		for (Reaction re : doc.getModel().getListOfReactions())
@@ -317,7 +317,7 @@ public class PeerModel implements PathwayListener
 			double x = xco;
 			double y = yco;
 			PeerReaction pr = PeerReaction.createFromSbml(this, re, x, y);
-		
+
 			boolean next = true;
 			if (re.getListOfReactants().size() > 0)
 			{
@@ -330,11 +330,13 @@ public class PeerModel implements PathwayListener
 					next = false;
 				}
 			}
-			if (next) nextLocation();
-			
-			
+			if (next) {
+				nextLocation();
+			}
+
+
 			double yy = y;
-			
+
 			for (SpeciesReference j : re.getListOfProducts())
 			{
 				String sid = j.getSpecies();
@@ -343,9 +345,9 @@ public class PeerModel implements PathwayListener
 				pwy.add(bsref.getElement());
 				yy += 20;
 			}
-			
+
 			yy = y;
-			
+
 			for (SpeciesReference j : re.getListOfReactants())
 			{
 				String sid = j.getSpecies();
@@ -354,7 +356,7 @@ public class PeerModel implements PathwayListener
 				pwy.add(bsref.getElement());
 				yy += 20;
 			}
-			
+
 			for (ModifierSpeciesReference j : re.getListOfModifiers())
 			{
 				String sid = j.getSpecies();
@@ -364,7 +366,7 @@ public class PeerModel implements PathwayListener
 			}
 		}
 	}
-	
+
 	private void nextLocation()
 	{
 		yco += 150;
@@ -381,7 +383,7 @@ public class PeerModel implements PathwayListener
 		if (pelt == null)
 		{
 			Species sp = doc.getModel().getSpecies(sId);
-			
+
 			PeerSpecies sbr = PeerSpecies.createFromSpecies(this, sp, gc);
 			putSpeciesPeer (sId, sbr);
 			pelt = sbr.getSpeciesElement();
@@ -390,20 +392,30 @@ public class PeerModel implements PathwayListener
 			pelt.setTextLabel(sId);
 			Annotation annotation = doc.getModel().getSpecies(sId).getAnnotation();
 			for (int i = 0; i < annotation.getCVTermCount(); i++) {
-				
+
 				List<String> li = annotation.getCVTerm(i).getResources();
 				for (String string : li) {
 					String[] de = string.split("org/",2 );
 					String[] xe = de[1].split("/",2);
-					 DataSource ds = DataSource.getByFullName(xe[0]);
-				
-					
-					pelt.setDataSource(ds);
-					pelt.setGeneID(xe[1]);
-					
+
+					for (DataSource ds : DataSource.getDataSources()) {
+						System.out.println(ds.getFullName());
+						if (xe[0].equalsIgnoreCase(ds.getFullName())) {
+							pelt.setDataSource(ds);
+							pelt.setElementID(xe[1]);
+							if (ds.getType().equalsIgnoreCase("Protein")) {
+								pelt.setDataNodeType(DataNodeType.PROTEIN);
+							} else if (ds.getType().equalsIgnoreCase(
+									"Metabolite")) {
+								pelt.setDataNodeType(DataNodeType.METABOLITE);
+							} else {
+								pelt.setDataNodeType(DataNodeType.GENEPRODUCT);
+							}
+						}
+					}
 				}
 			}
-			
+
 			pwy.add(pelt);
 		}
 		return pelt;
