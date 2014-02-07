@@ -1,6 +1,6 @@
 // PathVisio,
 // a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2009 BiGCaT Bioinformatics
+// Copyright 2006-2014 BiGCaT Bioinformatics
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ import org.sbml.jsbml.SBMLReader;
  * @version 1.0.0
  * 
  */
+@SuppressWarnings("serial")
 public class ValidatePanel extends JPanel {
 
 	SBMLPlugin plugin;
@@ -163,7 +164,7 @@ public class ValidatePanel extends JPanel {
 		 * FileChooser dialog appears on clicking the Open Button
 		 */
 		modelChooser = new JFileChooser(
-				"/home/anwesha/PathVisio-Data/SBMLPluginResources/Models");
+System.getProperty("user.home"));
 		modelChooser.setVisible(true);
 		// filtering the files based on their extensions.
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
