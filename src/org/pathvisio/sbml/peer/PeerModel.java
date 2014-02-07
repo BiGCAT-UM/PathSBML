@@ -383,24 +383,29 @@ public class PeerModel implements PathwayListener
 		if (pelt == null)
 		{
 			Species sp = doc.getModel().getSpecies(sId);
-
 			PeerSpecies sbr = PeerSpecies.createFromSpecies(this, sp, gc);
 			putSpeciesPeer (sId, sbr);
 			pelt = sbr.getSpeciesElement();
 			pelt.setMCenterX(prefX);
 			pelt.setMCenterY(prefY);
 			pelt.setTextLabel(sId);
+
 			Annotation annotation = doc.getModel().getSpecies(sId).getAnnotation();
 			for (int i = 0; i < annotation.getCVTermCount(); i++) {
 
 				List<String> li = annotation.getCVTerm(i).getResources();
 				for (String string : li) {
+					System.out.println(string);
 					String[] de = string.split("org/",2 );
 					String[] xe = de[1].split("/",2);
+					// xe[0] = xe[0].replaceFirst("obo.", "");
+					// xe[0] = xe[0].replaceFirst(".", "");
+
+					// System.out.println(xe[0]);
 
 					for (DataSource ds : DataSource.getDataSources()) {
-						System.out.println(ds.getFullName());
 						if (xe[0].equalsIgnoreCase(ds.getFullName())) {
+							System.out.println("database" + ds.getSystemCode());
 							pelt.setDataSource(ds);
 							pelt.setElementID(xe[1]);
 							if (ds.getType().equalsIgnoreCase("Protein")) {
