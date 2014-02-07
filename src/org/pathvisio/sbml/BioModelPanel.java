@@ -314,7 +314,8 @@ public class BioModelPanel extends JPanel {
 		search.addActionListener(searchBioModelAction);
 
 
-		Vector<String> clients = new Vector<String>(plugin.getClients().keySet());
+		Vector<String> clients = new Vector<String>(plugin.getClients()
+				.keySet());
 		Collections.sort(clients);
 
 		clientDropdown = new JComboBox(clients);

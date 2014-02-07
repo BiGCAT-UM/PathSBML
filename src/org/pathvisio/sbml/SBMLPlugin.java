@@ -58,8 +58,28 @@ import uk.ac.ebi.biomodels.ws.BioModelsWSException;
 
 /**
  * SBML importer and exporter
+ * 
+ * @author applecool
+ * @author anwesha
+ * @version 1.0.0
  */
 public class SBMLPlugin implements Plugin {
+
+	private PvDesktop desktop;
+	private JMenu exportmenu;
+	private JMenu sbmlmenu;
+	private JMenuItem sbmlExport;
+	private JMenuItem sbmlImport;
+	private JMenuItem biomodels;
+	private JMenuItem layout;
+	private JMenuItem validate;
+	Component sbmlPanel;
+	private final File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
+	private final ValidateAction validateAction = new ValidateAction();
+	private final FRLayoutAction layoutAction = new FRLayoutAction();
+	private final BioModelsAction biomodelAction = new BioModelsAction();
+	private final Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
+
 	private class BioModelsAction extends AbstractAction {
 
 		BioModelsAction() {
@@ -167,56 +187,68 @@ public class SBMLPlugin implements Plugin {
 		return clientName;
 	}
 
-	private PvDesktop desktop;
-	private JMenu sbmlmenu;
-	private JMenuItem biomodels;
-	private JMenuItem layout;
-
-	private JMenuItem validate;
-
-	Component sbmlPanel;
-
-	private final File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
-
-	private final ValidateAction validateAction = new ValidateAction();
-
-	private final FRLayoutAction layoutAction = new FRLayoutAction();
-
-	private final BioModelsAction biomodelAction = new BioModelsAction();
-
-	private final Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
-
+	/**
+	 * @author anwesha
+	 */
 	public void createSbmlMenu() {
-
+		exportmenu = new JMenu("A submenu");
 		sbmlmenu = new JMenu("SBML Plugin");
 
-		biomodels = new JMenuItem("Biomodel Import");
+		sbmlImport = new JMenuItem("Import Local Model");
+		biomodels = new JMenuItem("Import Biomodel.org Model");
 		layout = new JMenuItem("Force Directed Layout");
 		validate = new JMenuItem("Validate");
 
+		sbmlExport = new JMenuItem("Export Model");
+		// asSBML = new JMenuItem("SBML");
+		// asGPML = new JMenuItem("GPML");
+		// asPNG = new JMenuItem("PNG");
+		// asSVG = new JMenuItem("SVG");
+		// asTIFF = new JMenuItem("TIFF");
+		// asPDF = new JMenuItem("PDF");
+
+		// asSBML.addActionListener(actions.exportAction);
+		// asGPML.addActionListener(actions.exportAction);
+		// asPNG.addActionListener(actions.exportAction);
+		// asSVG.addActionListener(actions.exportAction);
+		// asTIFF.addActionListener(actions.exportAction);
+		// asPDF.addActionListener(actions.exportAction);
+
+		// sbmlExport.add(asSBML);
+		// sbmlExport.add(asGPML);
+		// sbmlExport.add(asPNG);
+		// sbmlExport.add(asSVG);
+		// sbmlExport.add(asPDF);
+		// sbmlExport.add(asTIFF);
+
+		sbmlImport
+		.addActionListener(desktop.getSwingEngine().getActions().importAction);
 		biomodels.addActionListener(biomodelAction);
 		layout.addActionListener(layoutAction);
 		validate.addActionListener(validateAction);
+		sbmlExport
+		.addActionListener(desktop.getSwingEngine().getActions().exportAction);
 
+		sbmlmenu.add(sbmlImport);
 		sbmlmenu.add(biomodels);
 		sbmlmenu.add(layout);
 		sbmlmenu.add(validate);
+		sbmlmenu.add(sbmlExport);
 
 		desktop.registerSubMenu("Plugins", sbmlmenu);
 	}
 
-	@Override
-	public void done() {
-		desktop.getSideBarTabbedPane().remove(sbmlPanel);
-
-		desktop.unregisterSubMenu("Plugins", sbmlmenu);
-		if(tmpDir.exists()) {
-			tmpDir.delete();
-		}
-	}
-
 	public Map<String, BioModelsWSClient> getClients() {
 		return clients;
+	}
+
+	private void loadClient() throws MalformedURLException, ServiceException,
+	BioModelsWSException {
+		BioModelsWSClient client = new BioModelsWSClient();
+		clients.put(
+				"http://www.ebi.ac.uk/biomodels-main/services/BioModelsWebServices?wsdl",
+				client);
+
 	}
 
 	public File getTmpDir() {
@@ -257,13 +289,14 @@ public class SBMLPlugin implements Plugin {
 		}
 	}
 
-	private void loadClient() throws MalformedURLException, ServiceException,
-	BioModelsWSException {
-		BioModelsWSClient client = new BioModelsWSClient();
-		clients.put(
-				"http://www.ebi.ac.uk/biomodels-main/services/BioModelsWebServices?wsdl",
-				client);
+	@Override
+	public void done() {
+		desktop.getSideBarTabbedPane().remove(sbmlPanel);
 
+		desktop.unregisterSubMenu("Plugins", sbmlmenu);
+		if(tmpDir.exists()) {
+			tmpDir.delete();
+		}
 	}
 
 	protected void openPathway(BioModelsWSClient client, String id, int rev,

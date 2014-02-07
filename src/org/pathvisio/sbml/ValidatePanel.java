@@ -45,6 +45,7 @@ import javax.swing.text.StyledDocument;
 import javax.xml.stream.XMLStreamException;
 
 import org.pathvisio.core.debug.Logger;
+import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.util.ProgressKeeper;
 import org.pathvisio.gui.ProgressDialog;
 import org.sbml.jsbml.SBMLDocument;
@@ -163,8 +164,11 @@ public class ValidatePanel extends JPanel {
 		/*
 		 * FileChooser dialog appears on clicking the Open Button
 		 */
+		// modelChooser = new JFileChooser(System.getProperty("user.home"));
+
 		modelChooser = new JFileChooser(
-System.getProperty("user.home"));
+				GlobalPreference.DIR_LAST_USED_IMPORT.toString());
+
 		modelChooser.setVisible(true);
 		// filtering the files based on their extensions.
 		FileNameExtensionFilter filter = new FileNameExtensionFilter(
