@@ -134,4 +134,5 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 			}
 		});
 	}
+
 }

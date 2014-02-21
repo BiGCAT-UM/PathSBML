@@ -389,25 +389,41 @@ public class PeerModel implements PathwayListener
 			pelt.setMCenterX(prefX);
 			pelt.setMCenterY(prefY);
 			pelt.setTextLabel(sId);
-
+			// for (DataSource ds : DataSource.getDataSources()) {
+			// System.out
+			// .println(ds.getSystemCode() + "\t" + ds.getFullName());
+			// }
 			Annotation annotation = doc.getModel().getSpecies(sId).getAnnotation();
 			for (int i = 0; i < annotation.getCVTermCount(); i++) {
 
-				List<String> li = annotation.getCVTerm(i).getResources();
-				for (String string : li) {
-					System.out.println(string);
-					String[] de = string.split("org/",2 );
-					String[] xe = de[1].split("/",2);
-					// xe[0] = xe[0].replaceFirst("obo.", "");
-					// xe[0] = xe[0].replaceFirst(".", "");
+				List<String> annotationList = annotation.getCVTerm(i).getResources();
+				for (String xrefString : annotationList) {
+					System.out.println("here");
+					System.out.println(xrefString);
+					String[] de = xrefString.split("org/", 2);
+					String[] xe = de[1].split("/", 2);
 
-					// System.out.println(xe[0]);
-
-					for (DataSource ds : DataSource.getDataSources()) {
-						if (xe[0].equalsIgnoreCase(ds.getFullName())) {
-							System.out.println("database" + ds.getSystemCode());
+					String database = xe[0];
+					String identifier = xe[1];
+					DataSource ds;
+					if (database.contains("obo.")) {
+						database = database.replaceAll("obo.", "");
+						ds = DataSource.getBySystemCode("Ce");
+						pelt.setDataSource(ds);
+						pelt.setElementID(identifier);
+						if (ds.getType().equalsIgnoreCase("Protein")) {
+							pelt.setDataNodeType(DataNodeType.PROTEIN);
+						} else if (ds.getType().equalsIgnoreCase("Metabolite")) {
+							pelt.setDataNodeType(DataNodeType.METABOLITE);
+						} else {
+							pelt.setDataNodeType(DataNodeType.GENEPRODUCT);
+						}
+					} else {
+						if (database.contains(".compound")) {
+							database = database.replaceAll(".compound", "");
+							ds = DataSource.getBySystemCode("Cpc");
 							pelt.setDataSource(ds);
-							pelt.setElementID(xe[1]);
+							pelt.setElementID(identifier);
 							if (ds.getType().equalsIgnoreCase("Protein")) {
 								pelt.setDataNodeType(DataNodeType.PROTEIN);
 							} else if (ds.getType().equalsIgnoreCase(
@@ -418,6 +434,32 @@ public class PeerModel implements PathwayListener
 							}
 						}
 					}
+
+					// xe[0] = xe[0].replaceFirst("obo.", "");
+					// xe[0] = xe[0].replaceFirst(".", "");
+					//
+					System.out.println("database " + database);
+					System.out.println("identifier " + identifier);
+
+
+					// for (DataSource ds : DataSource.getDataSources()) {
+					// System.out.println(ds.);
+					// // if (xe[0].equalsIgnoreCase(ds.getFullName())) {
+					// if (database.contains(ds.getFullName())) {
+					// System.out
+					// .println("database2" + ds.getSystemCode());
+					// pelt.setDataSource(ds);
+					// pelt.setElementID(xe[1]);
+					// if (ds.getType().equalsIgnoreCase("Protein")) {
+					// pelt.setDataNodeType(DataNodeType.PROTEIN);
+					// } else if (ds.getType().equalsIgnoreCase(
+					// "Metabolite")) {
+					// pelt.setDataNodeType(DataNodeType.METABOLITE);
+					// } else {
+					// pelt.setDataNodeType(DataNodeType.GENEPRODUCT);
+					// }
+					// }
+					// }
 				}
 			}
 

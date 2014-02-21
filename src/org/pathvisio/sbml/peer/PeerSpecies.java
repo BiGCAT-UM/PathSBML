@@ -1,12 +1,27 @@
+// PathVisio,
+// a tool for data visualization and analysis using Biological Pathways
+// Copyright 2006-2014 BiGCaT Bioinformatics
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
 package org.pathvisio.sbml.peer;
 
-import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.core.model.PathwayElementEvent;
 import org.pathvisio.core.model.PathwayElementListener;
 import org.pathvisio.sbgn.SbgnTemplates;
 import org.sbgn.GlyphClazz;
-import org.sbml.jsbml.Model;
 import org.sbml.jsbml.Species;
 import org.sbml.jsbml.ext.layout.BoundingBox;
 import org.sbml.jsbml.ext.layout.Dimensions;
@@ -15,21 +30,21 @@ import org.sbml.jsbml.ext.layout.SpeciesGlyph;
 
 public class PeerSpecies implements PathwayElementListener
 {
-	private PathwayElement elt;
-	private Species sp;
-	private SpeciesGlyph sg;
+	private final PathwayElement pathwayElement;
+	private final Species nodes;
+	private SpeciesGlyph nodeGlyphs;
 
 	public PeerSpecies(PathwayElement elt, Species sp)
 	{
-		this.elt = elt;
-		this.sp = sp;
+		this.pathwayElement = elt;
+		this.nodes = sp;
 		elt.addListener(this);
 	}
-	
+
 	public static PeerSpecies createFromSpecies(PeerModel parent, Species sp, GlyphClazz gc)
 	{
 		PathwayElement elt = SbgnTemplates.createGlyph(gc, parent.getPathway(), 0, 0);
-		elt.setGraphId(sp.getId());		
+		elt.setGraphId(sp.getId());
 		PeerSpecies bs = new PeerSpecies(elt, sp);
 		bs.updateElt();
 		return bs;
@@ -45,7 +60,7 @@ public class PeerSpecies implements PathwayElementListener
 
 	public PathwayElement getSpeciesElement()
 	{
-		return elt;
+		return pathwayElement;
 	}
 
 	@Override
@@ -56,30 +71,30 @@ public class PeerSpecies implements PathwayElementListener
 
 	private boolean updatingSpecies = false;
 	private boolean updatingElt = false;
-	
+
 	private void updateElt()
 	{
 		if (updatingSpecies) return;
-		
+
 		try
 		{
 			updatingElt = true;
-			
-			elt.setTextLabel(sp.getName());
-			if (sg != null)
+
+			pathwayElement.setTextLabel(nodes.getName());
+			if (nodeGlyphs != null)
 			{
-				BoundingBox bb = sg.getBoundingBox();
+				BoundingBox bb = nodeGlyphs.getBoundingBox();
 				Point p = bb.getPosition();
 				if (p != null)
 				{
-					elt.setMCenterX(p.getX());
-					elt.setMCenterY(p.getY());
+					pathwayElement.setMCenterX(p.getX());
+					pathwayElement.setMCenterY(p.getY());
 				}
 				Dimensions d = bb.getDimensions();
 				if (d != null)
 				{
-					elt.setMWidth(d.getWidth());
-					elt.setMHeight(d.getHeight());
+					pathwayElement.setMWidth(d.getWidth());
+					pathwayElement.setMHeight(d.getHeight());
 				}
 			}
 		}
@@ -88,31 +103,37 @@ public class PeerSpecies implements PathwayElementListener
 			updatingElt = false;
 		}
 	}
-	
+
 	private void updateSpecies()
 	{
 		if (updatingElt) return;
-		
+
 		try
 		{
 			updatingSpecies = true;
-			sp.setName(elt.getTextLabel());
-			if (sg != null)
+			nodes.setName(pathwayElement.getTextLabel());
+			if (nodeGlyphs != null)
 			{
-				BoundingBox bb = sg.getBoundingBox();
-				if (bb == null) bb = sg.createBoundingBox();
-				
+				BoundingBox bb = nodeGlyphs.getBoundingBox();
+				if (bb == null) {
+					bb = nodeGlyphs.createBoundingBox();
+				}
+
 				Point p = bb.getPosition();
-				if (p == null) bb.createPosition();
-					
-				p.setX(elt.getMCenterX());
-				p.setY(elt.getMCenterY());
+				if (p == null) {
+					bb.createPosition();
+				}
+
+				p.setX(pathwayElement.getMCenterX());
+				p.setY(pathwayElement.getMCenterY());
 
 				Dimensions d = bb.getDimensions();
-				if (d == null) bb.createDimensions();
-				
-				d.setWidth(elt.getMWidth());
-				d.setHeight(elt.getMHeight());
+				if (d == null) {
+					bb.createDimensions();
+				}
+
+				d.setWidth(pathwayElement.getMWidth());
+				d.setHeight(pathwayElement.getMHeight());
 			}
 		}
 		finally
@@ -123,8 +144,8 @@ public class PeerSpecies implements PathwayElementListener
 
 	public void setSpeciesGlyph(SpeciesGlyph g)
 	{
-		this.sg = g;
+		this.nodeGlyphs = g;
 		updateElt();
 	}
-	
+
 }

@@ -25,17 +25,20 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.xml.rpc.ServiceException;
 import javax.xml.stream.XMLStreamException;
 
@@ -43,9 +46,11 @@ import org.pathvisio.core.Engine;
 import org.pathvisio.core.debug.Logger;
 import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.Pathway;
+import org.pathvisio.core.model.PathwayIO;
 import org.pathvisio.core.preferences.GlobalPreference;
 import org.pathvisio.core.preferences.Preference;
 import org.pathvisio.core.util.ProgressKeeper;
+import org.pathvisio.core.util.Utils;
 import org.pathvisio.desktop.PvDesktop;
 import org.pathvisio.desktop.plugin.Plugin;
 import org.pathvisio.gui.ProgressDialog;
@@ -66,6 +71,7 @@ import uk.ac.ebi.biomodels.ws.BioModelsWSException;
 public class SBMLPlugin implements Plugin {
 
 	private PvDesktop desktop;
+	private JFileChooser modelChooser;
 	private JMenu exportmenu;
 	private JMenu sbmlmenu;
 	private JMenuItem sbmlExport;
@@ -74,10 +80,20 @@ public class SBMLPlugin implements Plugin {
 	private JMenuItem layout;
 	private JMenuItem validate;
 	Component sbmlPanel;
+
+	final Set<PathwayIO> MODEL_FORMAT_ONLY = Utils
+			.setOf((PathwayIO) new SBMLFormat(this));
+
 	private final File tmpDir = new File(GlobalPreference.getPluginDir(), "models-cache");
+
 	private final ValidateAction validateAction = new ValidateAction();
+
 	private final FRLayoutAction layoutAction = new FRLayoutAction();
+
+	private final ImportModelAction importmodelAction = new ImportModelAction();
+
 	private final BioModelsAction biomodelAction = new BioModelsAction();
+
 	private final Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
 
 	private class BioModelsAction extends AbstractAction {
@@ -102,7 +118,6 @@ public class SBMLPlugin implements Plugin {
 		}
 
 	}
-
 	/**
 	 * This class adds the action to the Force Directed Layout button.
 	 * 
@@ -129,10 +144,29 @@ public class SBMLPlugin implements Plugin {
 		}
 
 	}
-
+	/**
+	 * @author anwesha
+	 *
+	 */
 	public static enum PlPreference implements Preference {
-		PL_LAYOUT_FR_ATTRACTION("0.5"), PL_LAYOUT_FR_REPULSION("1"), PL_LAYOUT_SPRING_FORCE(
-				"0.33"), PL_LAYOUT_SPRING_REPULSION("100"), PL_LAYOUT_SPRING_STRETCH(
+		/**
+		 * 
+		 */
+		PL_LAYOUT_FR_ATTRACTION("0.5"), /**
+		 * 
+		 */
+		PL_LAYOUT_FR_REPULSION("1"), /**
+		 * 
+		 */
+		PL_LAYOUT_SPRING_FORCE(
+				"0.33"), /**
+				 * 
+				 */
+				PL_LAYOUT_SPRING_REPULSION("100"),
+				/**
+				 * 
+				 */
+				PL_LAYOUT_SPRING_STRETCH(
 						"0.7");
 
 		private final String defaultVal;
@@ -146,7 +180,6 @@ public class SBMLPlugin implements Plugin {
 			return defaultVal;
 		}
 	}
-
 	/**
 	 * This class adds action to the Validate button.
 	 * 
@@ -175,6 +208,30 @@ public class SBMLPlugin implements Plugin {
 		}
 
 	}
+	private class ImportModelAction extends AbstractAction {
+
+		ImportModelAction() {
+			putValue(NAME, "Import");
+		}
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			modelChooser = new JFileChooser(
+					GlobalPreference.DIR_LAST_USED_IMPORT.toString());
+			modelChooser.setVisible(true);
+			// filtering the files based on their extensions.
+			FileNameExtensionFilter filter = new FileNameExtensionFilter(
+					"SBML(Systems Biology Markup Language) (.sbml,.xml)",
+					"sbml", "xml");
+			modelChooser.setFileFilter(filter);
+			int returnVal = modelChooser.showOpenDialog(desktop
+					.getSwingEngine().getApplicationPanel());
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = modelChooser.getSelectedFile();
+				desktop.getSwingEngine().importPathway(file);
+			}
+		}
+	}
+
 
 	public static String shortClientName(String clientName) {
 		Pattern pattern = Pattern.compile("http://(.*?)/");
@@ -186,6 +243,8 @@ public class SBMLPlugin implements Plugin {
 
 		return clientName;
 	}
+
+
 
 	/**
 	 * @author anwesha
@@ -221,8 +280,9 @@ public class SBMLPlugin implements Plugin {
 		// sbmlExport.add(asPDF);
 		// sbmlExport.add(asTIFF);
 
-		sbmlImport
-		.addActionListener(desktop.getSwingEngine().getActions().importAction);
+		// sbmlImport
+		// .addActionListener(desktop.getSwingEngine().getActions().importAction);
+		sbmlImport.addActionListener(importmodelAction);
 		biomodels.addActionListener(biomodelAction);
 		layout.addActionListener(layoutAction);
 		validate.addActionListener(validateAction);
@@ -238,17 +298,18 @@ public class SBMLPlugin implements Plugin {
 		desktop.registerSubMenu("Plugins", sbmlmenu);
 	}
 
-	public Map<String, BioModelsWSClient> getClients() {
-		return clients;
+	@Override
+	public void done() {
+		desktop.getSideBarTabbedPane().remove(sbmlPanel);
+
+		desktop.unregisterSubMenu("Plugins", sbmlmenu);
+		if(tmpDir.exists()) {
+			tmpDir.delete();
+		}
 	}
 
-	private void loadClient() throws MalformedURLException, ServiceException,
-	BioModelsWSException {
-		BioModelsWSClient client = new BioModelsWSClient();
-		clients.put(
-				"http://www.ebi.ac.uk/biomodels-main/services/BioModelsWebServices?wsdl",
-				client);
-
+	public Map<String, BioModelsWSClient> getClients() {
+		return clients;
 	}
 
 	public File getTmpDir() {
@@ -289,14 +350,13 @@ public class SBMLPlugin implements Plugin {
 		}
 	}
 
-	@Override
-	public void done() {
-		desktop.getSideBarTabbedPane().remove(sbmlPanel);
+	private void loadClient() throws MalformedURLException, ServiceException,
+	BioModelsWSException {
+		BioModelsWSClient client = new BioModelsWSClient();
+		clients.put(
+				"http://www.ebi.ac.uk/biomodels-main/services/BioModelsWebServices?wsdl",
+				client);
 
-		desktop.unregisterSubMenu("Plugins", sbmlmenu);
-		if(tmpDir.exists()) {
-			tmpDir.delete();
-		}
 	}
 
 	protected void openPathway(BioModelsWSClient client, String id, int rev,
@@ -321,7 +381,7 @@ public class SBMLPlugin implements Plugin {
 
 			Engine engine = desktop.getSwingEngine().getEngine();
 			engine.setWrapper(desktop.getSwingEngine().createWrapper());
-			SBMLFormat.doc = doc;
+			SBMLFormat.modelDoc = doc;
 			engine.openPathway(tmp2);
 
 		} catch (XMLStreamException e) {
@@ -371,5 +431,5 @@ public class SBMLPlugin implements Plugin {
 	public void setLastImported(SBMLDocument document) {
 
 	}
-
 }
+
