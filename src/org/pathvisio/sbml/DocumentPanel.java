@@ -54,7 +54,7 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 
 	public DocumentPanel(SwingEngine eng) {
 		setLayout(new BorderLayout());
-		treePane = new JScrollPane(new JTree(SBMLFormat.doc));
+		treePane = new JScrollPane(new JTree(SBMLFormat.modelDoc));
 		add(treePane);
 		eng.getEngine().addApplicationEventListener(this);
 		executor = Executors.newSingleThreadExecutor();
@@ -73,7 +73,7 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 		if (e.getType() == Type.PATHWAY_OPENED)
 
 		{
-			setInput(SBMLFormat.doc);
+			setInput(SBMLFormat.modelDoc);
 
 		}
 
@@ -109,7 +109,7 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 						remove(treePane);
 						JTree elementTree = new JTree();
 						TreeModel elementModel = new NavigationTree(
-								SBMLFormat.doc).getTreeModel();
+								SBMLFormat.modelDoc).getTreeModel();
 						elementTree.setModel(elementModel);
 						treePane = new JScrollPane(elementTree);
 						add(treePane);
