@@ -1,6 +1,6 @@
-// PathVisio,
-// a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2014 BiGCaT Bioinformatics
+// PathSBML Plugin
+// SBML Plugin for PathVisio.
+// Copyright 2013 developed for Google Summer of Code
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,44 +14,36 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package org.pathvisio.sbml;
 
 import java.io.File;
-import java.io.IOException;
 
-import javax.xml.stream.XMLStreamException;
-
-import org.pathvisio.core.model.ConverterException;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.sbml.peer.PeerModel;
 import org.sbml.jsbml.SBMLDocument;
 import org.sbml.jsbml.xml.stax.SBMLReader;
 
-public class SbmlImportHelper
-{
+public class SbmlImportHelper {
 	private PeerModel br;
+	SBMLDocument doc;
 
 
-	public Pathway doImport(File file) throws ConverterException
-	{
+	public Pathway doImport(File file) {
 		try {
-			SBMLDocument doc = new SBMLReader().readSBML(file.getAbsolutePath());
+			doc = new SBMLReader()
+			.readSBML(file.getAbsolutePath());
 
-			br = PeerModel.createFromDoc(doc, file);
-			return br.getPathway();
+			br = PeerModel.createFromDoc(doc);
 		}
-		catch (IOException ex)
-		{
-			throw new ConverterException (ex);
+		catch (Exception ex) {
+			System.out.println("WARNING :" + doc.getModel().getName()
+					+ "could not be converted");
 		}
-		catch (XMLStreamException ex)
-		{
-			throw new ConverterException (ex);
-		}
+		return br.getPathway();
 	}
 
-	public SBMLDocument getDocument()
-	{
+	public SBMLDocument getDocument() {
 		return br.getDoc();
 	}
 

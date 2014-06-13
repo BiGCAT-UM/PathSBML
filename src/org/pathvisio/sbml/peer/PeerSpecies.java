@@ -1,6 +1,6 @@
-// PathVisio,
-// a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2014 BiGCaT Bioinformatics
+// PathSBML Plugin
+// SBML Plugin for PathVisio.
+// Copyright 2013 developed for Google Summer of Code
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,16 +41,37 @@ public class PeerSpecies implements PathwayElementListener
 		elt.addListener(this);
 	}
 
-	public static PeerSpecies createFromSpecies(PeerModel parent, Species sp, GlyphClazz gc)
+	public static PeerSpecies createFromSpecies(PeerModel parent, Species sp,
+			GlyphClazz gc)
 	{
-		PathwayElement elt = SbgnTemplates.createGlyph(gc, parent.getPathway(), 0, 0);
+		PathwayElement elt = SbgnTemplates.createGlyph(gc, parent.getPathway(),
+				0, 0);
 		elt.setGraphId(sp.getId());
+
 		PeerSpecies bs = new PeerSpecies(elt, sp);
 		bs.updateElt();
 		return bs;
 	}
 
-	public static PeerSpecies createFromElt (PeerModel parent, PathwayElement elt, GlyphClazz gc)
+	/*
+	 * Save all infiormation available in the model in the pathway
+	 */
+	private void addInfo(PathwayElement elt, Species sp) {
+		if (sp.isSetName()) {
+			elt.setTextLabel(sp.getName());
+		}
+		if (sp.isSetBoundaryCondition()) {
+			elt.setDynamicProperty("BoundaryCondition",
+					String.valueOf(sp.getBoundaryCondition()));
+		}
+		if (sp.isHasOnlySubstanceUnits()) {
+			elt.setDynamicProperty("HasOnlySubstanceUnits",
+					sp.getSubstanceUnits());
+		}
+
+	}
+	public static PeerSpecies createFromElt(PeerModel parent,
+			PathwayElement elt, GlyphClazz gc)
 	{
 		Species sp = parent.getModel().createSpecies(elt.getGraphId());
 		PeerSpecies bs = new PeerSpecies(elt, sp);

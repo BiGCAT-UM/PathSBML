@@ -1,6 +1,6 @@
-// PathVisio,
-// a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2009 BiGCaT Bioinformatics
+// PathSBML Plugin
+// SBML Plugin for PathVisio.
+// Copyright 2013 developed for Google Summer of Code
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package org.pathvisio.sbml;
 
 import java.awt.Component;
@@ -49,6 +50,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.pathvisio.core.debug.Logger;
@@ -67,6 +69,7 @@ import uk.ac.ebi.biomodels.ws.BioModelsWSClient;
  * @author anwesha
  * @version 1.0.0
  */
+@SuppressWarnings("serial")
 public class BioModelPanel extends JPanel {
 
 	SBMLPlugin plugin;
@@ -74,7 +77,7 @@ public class BioModelPanel extends JPanel {
 	static Border etch = BorderFactory.createEtchedBorder();
 	private JComboBox clientDropdown;
 	private JTable resultTable;
-	private JScrollPane resultspane;
+	JScrollPane resultspane;
 
 	private JRadioButton Browse;
 	private JRadioButton All;
@@ -90,6 +93,9 @@ public class BioModelPanel extends JPanel {
 	private JTextField taxonomyId;
 	private JButton search;
 
+	/**
+	 * @param plugin
+	 */
 	public BioModelPanel(final SBMLPlugin plugin) {
 
 		this.plugin = plugin;
@@ -114,13 +120,13 @@ public class BioModelPanel extends JPanel {
 		group2.add(NonCurated);
 
 		// biomodel search terms
-		bioModelName = new JTextField();
-		chebiId = new JTextField();
-		uniprotId = new JTextField();
-		pubTitId = new JTextField();
-		personName = new JTextField();
-		goId = new JTextField();
-		taxonomyId = new JTextField();
+		setBioModelName(new JTextField());
+		setChebiId(new JTextField());
+		setUniprotId(new JTextField());
+		setPubTitId(new JTextField());
+		setPersonName(new JTextField());
+		setGoId(new JTextField());
+		setTaxonomyId(new JTextField());
 
 		//tooltips for browse buttons and search choice button
 		All.setToolTipText("Browse all submitted models at Biomodels");
@@ -130,13 +136,13 @@ public class BioModelPanel extends JPanel {
 		Search.setToolTipText("Choose to browse models in Biomodels");
 
 		//tooltips for all the search boxes
-		bioModelName.setToolTipText("Tip:Use Biomodel name (e.g.:'Tyson1991 - Cell Cycle 6 var')");
-		pubTitId.setToolTipText("Tip:Use publication name(e.g.:'sbml')");
-		chebiId.setToolTipText("Tip:Use Chebi id (e.g.:'24996')");
-		personName.setToolTipText("Tip:Use person/encoder name (e.g.:'Rainer','Nicolas')");
-		uniprotId.setToolTipText("Tip:Use Uniprot id (e.g.:'P04637','P10113')");
-		goId.setToolTipText("Tip:Use GO id (e.g.:'0006915')");
-		taxonomyId.setToolTipText("Tip:Use Taxonomy id (e.g.:'9606')");
+		getBioModelName().setToolTipText("Tip:Use Biomodel name (e.g.:'Tyson1991 - Cell Cycle 6 var')");
+		getPubTitId().setToolTipText("Tip:Use publication name(e.g.:'sbml')");
+		getChebiId().setToolTipText("Tip:Use Chebi id (e.g.:'24996')");
+		getPersonName().setToolTipText("Tip:Use person/encoder name (e.g.:'Rainer','Nicolas')");
+		getUniprotId().setToolTipText("Tip:Use Uniprot id (e.g.:'P04637','P10113')");
+		getGoId().setToolTipText("Tip:Use GO id (e.g.:'0006915')");
+		getTaxonomyId().setToolTipText("Tip:Use Taxonomy id (e.g.:'9606')");
 
 		// browse biomodel action
 		Action browseBioModelAction = new AbstractAction("browseBioModels") {
@@ -242,37 +248,37 @@ public class BioModelPanel extends JPanel {
 		cc2.gridx = 1;
 		cc2.gridy = 0;
 		cc2.gridwidth =2;
-		searchOptBox.add(bioModelName, cc2);
+		searchOptBox.add(getBioModelName(), cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 1;
 		cc2.gridwidth =2;
-		searchOptBox.add(pubTitId,cc2);
+		searchOptBox.add(getPubTitId(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 2;
 		cc2.gridwidth =2;
-		searchOptBox.add(chebiId,cc2);
+		searchOptBox.add(getChebiId(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 3;
 		cc2.gridwidth =2;
-		searchOptBox.add(personName,cc2);
+		searchOptBox.add(getPersonName(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 4;
 		cc2.gridwidth =2;
-		searchOptBox.add(uniprotId,cc2);
+		searchOptBox.add(getUniprotId(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 5;
 		cc2.gridwidth =2;
-		searchOptBox.add(goId,cc2);
+		searchOptBox.add(getGoId(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 6;
 		cc2.gridwidth =2;
-		searchOptBox.add(taxonomyId,cc2);
+		searchOptBox.add(getTaxonomyId(),cc2);
 		cc2.fill = GridBagConstraints.HORIZONTAL;
 		cc2.gridx = 1;
 		cc2.gridy = 7;
@@ -414,7 +420,8 @@ public class BioModelPanel extends JPanel {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	private void browse(final String command) throws RemoteException, InterruptedException,
+	void browse(final String command) throws RemoteException,
+	InterruptedException,
 	ExecutionException {
 
 		String clientName = clientDropdown.getSelectedItem().toString();
@@ -506,7 +513,7 @@ public class BioModelPanel extends JPanel {
 
 		resultTable.setModel(new ResultTableModel(sw.get(), clientName));
 		resultTable
-		.setRowSorter(new TableRowSorter(resultTable.getModel()));
+		.setRowSorter(new TableRowSorter<TableModel>(resultTable.getModel()));
 	}
 
 
@@ -517,17 +524,17 @@ public class BioModelPanel extends JPanel {
 	 * @throws InterruptedException
 	 * @throws ExecutionException
 	 */
-	private void search() throws RemoteException, InterruptedException,
+	void search() throws RemoteException, InterruptedException,
 	ExecutionException {
 
 		// search terms typed in the search boxes are trimmed and stored in the following respective variables.
-		final String sbmlName = bioModelName.getText().trim();
-		final String sbmlPub = pubTitId.getText().trim();
-		final String sbmlChebi = chebiId.getText().trim();
-		final String sbmlPerson = personName.getText().trim();
-		final String sbmlUniprot = uniprotId.getText().trim();
-		final String sbmlGo = goId.getText().trim();
-		final String sbmlTaxonomy = taxonomyId.getText().trim();
+		final String sbmlName = getBioModelName().getText().trim();
+		final String sbmlPub = getPubTitId().getText().trim();
+		final String sbmlChebi = getChebiId().getText().trim();
+		final String sbmlPerson = getPersonName().getText().trim();
+		final String sbmlUniprot = getUniprotId().getText().trim();
+		final String sbmlGo = getGoId().getText().trim();
+		final String sbmlTaxonomy = getTaxonomyId().getText().trim();
 
 		if (!(sbmlPub.isEmpty()&&sbmlName.isEmpty()&&sbmlChebi.isEmpty()&&sbmlPerson.isEmpty()&&sbmlUniprot.isEmpty()&&sbmlGo.isEmpty()&&sbmlTaxonomy.isEmpty())) {
 			String clientName = clientDropdown.getSelectedItem().toString();
@@ -552,7 +559,7 @@ public class BioModelPanel extends JPanel {
 					String[] results7 = null;
 					try {
 						// getting the models id by name.
-						if(!bioModelName.getText().equalsIgnoreCase(""))
+						if(!getBioModelName().getText().equalsIgnoreCase(""))
 						{
 							results1 = client.getModelsIdByName(sbmlName);
 
@@ -565,7 +572,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting the models id by publication title or id.
-						if(!pubTitId.getText().equalsIgnoreCase(""))
+						if(!getPubTitId().getText().equalsIgnoreCase(""))
 						{
 							results2= client.getModelsIdByPublication(sbmlPub);
 							if(results2!=null){
@@ -577,7 +584,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting models id by chebi id.
-						if(!chebiId.getText().equalsIgnoreCase(""))
+						if(!getChebiId().getText().equalsIgnoreCase(""))
 						{
 							results3= client.getModelsIdByChEBIId(sbmlChebi);
 							if(results3!=null){
@@ -589,7 +596,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting models id by person or encoder or author name.
-						if(!personName.getText().equalsIgnoreCase(""))
+						if(!getPersonName().getText().equalsIgnoreCase(""))
 						{
 							results4= client.getModelsIdByPerson(sbmlPerson);
 							if(results4!=null){
@@ -601,7 +608,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting models id by uniprot id.
-						if(!uniprotId.getText().equalsIgnoreCase(""))
+						if(!getUniprotId().getText().equalsIgnoreCase(""))
 						{
 							results5= client.getModelsIdByUniprot(sbmlUniprot);
 							if(results5!=null){
@@ -613,7 +620,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting models id by go id.
-						if(!goId.getText().equalsIgnoreCase(""))
+						if(!getGoId().getText().equalsIgnoreCase(""))
 						{
 							results6 = client.getModelsIdByGOId(sbmlGo);
 
@@ -626,7 +633,7 @@ public class BioModelPanel extends JPanel {
 						}
 
 						//getting models id by taxonomy id.
-						if(!taxonomyId.getText().equalsIgnoreCase(""))
+						if(!getTaxonomyId().getText().equalsIgnoreCase(""))
 						{
 							results7 = client.getModelsIdByTaxonomyId(sbmlTaxonomy);
 
@@ -675,7 +682,7 @@ public class BioModelPanel extends JPanel {
 
 			resultTable.setModel(new ResultTableModel(sw.get(), clientName));
 			resultTable
-			.setRowSorter(new TableRowSorter(resultTable.getModel()));
+			.setRowSorter(new TableRowSorter<TableModel>(resultTable.getModel()));
 		} else {
 			JOptionPane.showMessageDialog(null, "Please Enter a Search Query",
 					"ERROR", JOptionPane.ERROR_MESSAGE);
@@ -683,7 +690,7 @@ public class BioModelPanel extends JPanel {
 	}
 
 	//enable search
-	private void enableFrame(JPanel container, boolean enable) {
+	void enableFrame(JPanel container, boolean enable) {
 		Component[] components = container.getComponents();
 		for (Component component : components) {
 			component.setEnabled(enable);
@@ -691,6 +698,97 @@ public class BioModelPanel extends JPanel {
 				enableFrame((JPanel)component, enable);
 			}
 		}
+	}
+	/**
+	 * @return the pubTitId
+	 */
+	public JTextField getPubTitId() {
+		return pubTitId;
+	}
+
+	/**
+	 * @param pubTitId the pubTitId to set
+	 */
+	public void setPubTitId(JTextField pubTitId) {
+		this.pubTitId = pubTitId;
+	}
+	/**
+	 * @return the bioModelName
+	 */
+	public JTextField getBioModelName() {
+		return bioModelName;
+	}
+
+	/**
+	 * @param bioModelName the bioModelName to set
+	 */
+	public void setBioModelName(JTextField bioModelName) {
+		this.bioModelName = bioModelName;
+	}
+	/**
+	 * @return the chebiId
+	 */
+	public JTextField getChebiId() {
+		return chebiId;
+	}
+
+	/**
+	 * @param chebiId the chebiId to set
+	 */
+	public void setChebiId(JTextField chebiId) {
+		this.chebiId = chebiId;
+	}
+	/**
+	 * @return the personName
+	 */
+	public JTextField getPersonName() {
+		return personName;
+	}
+
+	/**
+	 * @param personName the personName to set
+	 */
+	public void setPersonName(JTextField personName) {
+		this.personName = personName;
+	}
+	/**
+	 * @return the goId
+	 */
+	public JTextField getGoId() {
+		return goId;
+	}
+
+	/**
+	 * @param goId the goId to set
+	 */
+	public void setGoId(JTextField goId) {
+		this.goId = goId;
+	}
+	/**
+	 * @return the taxonomyId
+	 */
+	public JTextField getTaxonomyId() {
+		return taxonomyId;
+	}
+
+	/**
+	 * @param taxonomyId the taxonomyId to set
+	 */
+	public void setTaxonomyId(JTextField taxonomyId) {
+		this.taxonomyId = taxonomyId;
+	}
+	/**
+	 * @return the uniprotId
+	 */
+	public JTextField getUniprotId() {
+		return uniprotId;
+	}
+
+	/**
+	 * @param uniprotId the uniprotId to set
+	 */
+	public void setUniprotId(JTextField uniprotId) {
+		this.uniprotId = uniprotId;
 	}
 	/**
 	 * This class creates the result table model

@@ -1,6 +1,6 @@
-// PathVisio,
-// a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2014 BiGCaT Bioinformatics
+// PathSBML Plugin
+// SBML Plugin for PathVisio.
+// Copyright 2013 developed for Google Summer of Code
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,17 +28,22 @@ import org.sbml.jsbml.SimpleSpeciesReference;
 public class PeerSpeciesReference implements PathwayElementListener
 {
 	private final PathwayElement pathwayELement;
-	public PeerSpeciesReference(PeerModel parent, PathwayElement elt, SimpleSpeciesReference sref)
+
+	public PeerSpeciesReference(PeerModel parent, PathwayElement elt,
+			SimpleSpeciesReference sref)
 	{
 		this.pathwayELement = elt;
 		elt.addListener(this);
 	}
 
-	public static PeerSpeciesReference createFromSpeciesReference(PeerModel parent, SimpleSpeciesReference sref, ArcClazz arcClazz,
+	public static PeerSpeciesReference createFromSpeciesReference(
+			PeerModel parent, SimpleSpeciesReference sref, ArcClazz arcClazz,
 			double sx, double sy, GraphIdContainer sid, double ex, double ey, GraphIdContainer eid)
 	{
-		PathwayElement elt = SbgnTemplates.createArc(parent.getPathway(), arcClazz, sx, sy, sid, ex, ey, eid);
-		PeerSpeciesReference result = new PeerSpeciesReference(parent, elt, sref);
+		PathwayElement elt = SbgnTemplates.createArc(parent.getPathway(),
+				arcClazz, sx, sy, sid, ex, ey, eid);
+		PeerSpeciesReference result = new PeerSpeciesReference(parent, elt,
+				sref);
 		result.updatePv();
 		return result;
 	}

@@ -1,6 +1,6 @@
-// PathVisio,
-// a tool for data visualization and analysis using Biological Pathways
-// Copyright 2006-2014 BiGCaT Bioinformatics
+// PathSBML Plugin
+// SBML Plugin for PathVisio.
+// Copyright 2013 developed for Google Summer of Code
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
+
 package org.pathvisio.sbml;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -28,11 +28,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.TreeModel;
 
 import org.pathvisio.core.ApplicationEvent;
-import org.pathvisio.core.ApplicationEvent.Type;
 import org.pathvisio.core.Engine;
 import org.pathvisio.core.Engine.ApplicationEventListener;
-import org.pathvisio.gui.SwingEngine;
-import org.sbml.jsbml.SBMLDocument;
 
 /**
  * This class adds action to the SBML side pane.
@@ -45,18 +42,20 @@ import org.sbml.jsbml.SBMLDocument;
  * @version 1.0.0
  * 
  */
-public class DocumentPanel extends JPanel implements ApplicationEventListener {
-	private SBMLDocument lastImported = null;
-	Engine engine;
-	Desktop desktop;
-	private JScrollPane treePane = new JScrollPane();
+public class DocumentPanel extends JPanel implements ApplicationEventListener
+{
+	// private SBMLDocument lastImported = null;
+	// Desktop desktop;
+	JScrollPane treePane = new JScrollPane();
 	private final ExecutorService executor;
 
-	public DocumentPanel(SwingEngine eng) {
+	// SBMLDocument document;
+
+	public DocumentPanel(Engine engine) {
 		setLayout(new BorderLayout());
 		treePane = new JScrollPane(new JTree(SBMLFormat.modelDoc));
 		add(treePane);
-		eng.getEngine().addApplicationEventListener(this);
+		engine.addApplicationEventListener(this);
 		executor = Executors.newSingleThreadExecutor();
 	}
 
@@ -67,27 +66,26 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 	 */
 	@Override
 	public void applicationEvent(ApplicationEvent e) {
-		if (e.getType() == Type.PATHWAY_NEW) {
+		switch(e.getType()) {
+		case PATHWAY_NEW:
 			clean();
-		}
-		if (e.getType() == Type.PATHWAY_OPENED)
-
-		{
-			setInput(SBMLFormat.modelDoc);
-
+			break;
+		case PATHWAY_OPENED:
+			doQuery();
+			break;
 		}
 
 	}
 
-	/**
-	 * This method is invoked in the applicationEvent if a new model is opened
-	 * 
-	 * @param modelDoc
-	 */
-	private void setInput(SBMLDocument doc) {
-		lastImported = doc;
-		doQuery();
-	}
+	// /**
+	// * This method is invoked in the applicationEvent if a new model is opened
+	// *
+	// * @param modelDoc
+	// */
+	// private void setInput() {
+	// // lastImported = doc;
+	// doQuery();
+	// }
 
 	/**
 	 * This method is invoked by the setInput function.
@@ -96,11 +94,10 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 	 * 
 	 */
 	private void doQuery() {
-
 		executor.execute(new Runnable() {
 			@Override
 			public void run() {
-				if (lastImported == null)
+				if (SBMLFormat.modelDoc == null)
 					return;
 
 				SwingUtilities.invokeLater(new Runnable() {
@@ -113,6 +110,8 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 						elementTree.setModel(elementModel);
 						treePane = new JScrollPane(elementTree);
 						add(treePane);
+						revalidate();
+						repaint();
 					}
 				});
 			}
@@ -129,10 +128,13 @@ public class DocumentPanel extends JPanel implements ApplicationEventListener {
 					@Override
 					public void run() {
 						remove(treePane);
+						revalidate();
+						repaint();
 					}
 				});
 			}
 		});
 	}
+
 
 }
