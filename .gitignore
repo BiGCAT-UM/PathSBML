@@ -1,0 +1,6 @@
+/bin/
+/.checkstyle
+/.classpath
+/.project
+/build/
+derby.log
