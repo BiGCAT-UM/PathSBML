@@ -47,7 +47,7 @@ public class PeerSpecies implements PathwayElementListener
 		PathwayElement elt = SbgnTemplates.createGlyph(gc, parent.getPathway(),
 				0, 0);
 		elt.setGraphId(sp.getId());
-
+		
 		PeerSpecies bs = new PeerSpecies(elt, sp);
 		bs.updateElt();
 		return bs;

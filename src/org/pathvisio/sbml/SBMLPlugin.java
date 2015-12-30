@@ -51,6 +51,7 @@ import org.pathvisio.core.util.Utils;
 import org.pathvisio.desktop.PvDesktop;
 import org.pathvisio.desktop.plugin.Plugin;
 import org.pathvisio.gui.ProgressDialog;
+import org.sbml.jsbml.SBMLDocument;
 
 import uk.ac.ebi.biomodels.ws.BioModelsWSClient;
 import uk.ac.ebi.biomodels.ws.BioModelsWSException;
@@ -60,7 +61,7 @@ import uk.ac.ebi.biomodels.ws.BioModelsWSException;
  * 
  * @author applecool
  * @author anwesha
- * @version 1.0.0
+ * 
  */
 public class SBMLPlugin implements Plugin {
 	private SBMLFormat sbmlformat;
@@ -68,13 +69,14 @@ public class SBMLPlugin implements Plugin {
 	JFileChooser modelChooser;
 	private JMenu sbmlmenu;
 	private JMenuItem sbmlImport;
+	private JMenuItem sbmlExport;
 	private JMenuItem biomodels;
 	private JMenuItem layout;
 	private JMenuItem validate;
 	Component sbmlPanel;
 
-	final Set<PathwayIO> MODEL_FORMAT_ONLY = Utils
-			.setOf((PathwayIO) new SBMLFormat(this));
+//	final Set<PathwayIO> MODEL_FORMAT_ONLY = Utils
+//			.setOf((PathwayIO) new SBMLFormat(this));
 
 	final File tmpDir = new File(GlobalPreference.getPluginDir(),
 			"models-cache");
@@ -85,12 +87,13 @@ public class SBMLPlugin implements Plugin {
 
 	private final ImportModelAction importmodelAction = new ImportModelAction();
 
-	// private final ExportModelAction exportmodelAction = new
-	// ExportModelAction();
+	private final ExportModelAction exportmodelAction = new
+	 ExportModelAction();
 
 	private final BioModelsAction biomodelAction = new BioModelsAction();
 
 	final Map<String, BioModelsWSClient> clients = new HashMap<String, BioModelsWSClient>();
+	private String extension = ".xml";
 
 	@SuppressWarnings("serial")
 	private class BioModelsAction extends AbstractAction {
@@ -132,7 +135,7 @@ public class SBMLPlugin implements Plugin {
 		private static final long serialVersionUID = 1L;
 
 		FRLayoutAction() {
-			putValue(NAME, "ForceDirectedLayout");
+			putValue(NAME, "Force Directed Layout");
 		}
 
 		@Override
@@ -279,10 +282,11 @@ public class SBMLPlugin implements Plugin {
 		sbmlmenu = new JMenu("SBML Plugin");
 
 		// egModel = new JMenuItem("Open Example Model");
-		sbmlImport = new JMenuItem("Import Local Model");
-		biomodels = new JMenuItem("Import Biomodel.org Model");
-		layout = new JMenuItem("Force Directed Layout");
-		validate = new JMenuItem("Validate");
+		sbmlImport = new JMenuItem("Import local model file");
+		biomodels = new JMenuItem("Import model directly from BioModels");
+		layout = new JMenuItem("Apply force directed layout");
+		validate = new JMenuItem("Validate selected model");
+		sbmlExport= new JMenuItem("Export pathway as SBML model");
 
 
 
@@ -290,14 +294,14 @@ public class SBMLPlugin implements Plugin {
 		biomodels.addActionListener(biomodelAction);
 		layout.addActionListener(layoutAction);
 		validate.addActionListener(validateAction);
-		// sbmlExport.addActionListener(exportmodelAction);
+		sbmlExport.addActionListener(exportmodelAction);
 
 		// sbmlmenu.add(egModel);
 		sbmlmenu.add(sbmlImport);
 		sbmlmenu.add(biomodels);
 		sbmlmenu.add(layout);
 		sbmlmenu.add(validate);
-		// sbmlmenu.add(sbmlExport);
+		sbmlmenu.add(sbmlExport);
 
 		desktop.registerSubMenu("Plugins", sbmlmenu);
 	}
@@ -322,7 +326,7 @@ public class SBMLPlugin implements Plugin {
 
 			// register importer / exporter
 			sbmlformat = new SBMLFormat(this);
-			// desktop.getSwingEngine().getEngine().addPathwayExporter(sbmlformat);
+			desktop.getSwingEngine().getEngine().addPathwayExporter(sbmlformat);
 			desktop.getSwingEngine().getEngine().addPathwayImporter(sbmlformat);
 
 			// register menu items
@@ -359,7 +363,7 @@ public class SBMLPlugin implements Plugin {
 			BioModelsWSException,
 			IOException {
 		String p = client.getModelSBMLById(id);
-		File tmp = new File(tmpDir, id + ".sbml");
+		File tmp = new File(tmpDir, id + extension);
 
 		BufferedWriter output = new BufferedWriter(new FileWriter(tmp));
 		output.write(p.toString());
@@ -368,7 +372,7 @@ public class SBMLPlugin implements Plugin {
 
 			Pathway pw = sbmlformat.doImport(tmp);
 
-			File tmp2 = new File(tmpDir, id + ".sbml");
+			File tmp2 = new File(tmpDir, id + extension );
 			pw.writeToXml(tmp2, true);
 
 			Engine engine = desktop.getSwingEngine().getEngine();
@@ -425,15 +429,15 @@ public class SBMLPlugin implements Plugin {
 		sw.get();
 	}
 
-	// /**
-	// * This method is called in the SBMLFormat.java This method sets the
-	// * imported document to the lastImported variable.
-	// *
-	// * @param sbmlDocument
-	// */
-	// public void setLastImported(SBMLDocument sbmlDocument) {
-	// last_model_imported = sbmlDocument;
-	// }
+//	 /**
+//	 * This method is called in the SBMLFormat.java This method sets the
+//	 * imported document to the lastImported variable.
+//	 *
+//	 * @param sbmlDocument
+//	 */
+//	 public void setLastImported(SBMLDocument sbmlDocument) {
+//	 last_model_imported = sbmlDocument;
+//	 }
 
 
 

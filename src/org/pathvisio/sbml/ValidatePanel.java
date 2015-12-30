@@ -23,13 +23,18 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.HashMap;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -70,6 +75,7 @@ public class ValidatePanel extends JPanel {
 	SBMLDocument document;
 	static Border etch = BorderFactory.createEtchedBorder();
 
+	private final JCheckBox current;
 	private final JButton openButton;
 	private final JButton validateButton;
 	private final JFileChooser modelChooser;
@@ -86,11 +92,42 @@ public class ValidatePanel extends JPanel {
 	 */
 	@SuppressWarnings("serial")
 	public ValidatePanel(final SBMLPlugin plugin) {
-		System.out.println("validate");
+//		System.out.println("validate");
 
 		this.plugin = plugin;
 		setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
+		
+		/*
+		 * This action shows a file chooser dialog box to select a model file
+		 * and opens it
+		 */
+		Action chooseModelAction = new AbstractAction("chooseModel") {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					validationResultPane.setText("");
+					
+					File file = modelChooser.getSelectedFile();
+						modelFileName = file.getPath();
+						validationStatusBar
+						.setText("You chose"
+								+ " "
+								+ file.getName());
+						if (file.canRead()) {
+							validateButton.setEnabled(true);
+						}
+					
+				} catch (Exception ex) {
+					JOptionPane
+					.showMessageDialog(ValidatePanel.this,
+							ex.getMessage(), "Error",
+							JOptionPane.ERROR_MESSAGE);
+					Logger.log.error("Error while opening selected model", ex);
+				}
+			}
+
+		};
 
 		/*
 		 * This action shows a file chooser dialog box to select a model file
@@ -152,12 +189,15 @@ public class ValidatePanel extends JPanel {
 		 * Buttons for button panel Panel appears on clicking Validate in
 		 * Plugins -> SBML Plugin -> Validate
 		 */
+		current = new JCheckBox ("Model file open");
 		openButton = new JButton("Open");
 		validateButton = new JButton("Validate");
 		// Add Tooltips
+		current.setToolTipText("Validate the currently open model file");
 		openButton.setToolTipText("Choose model file for validation");
 		validateButton.setToolTipText("Validate chosen model file");
 		// Add actions
+		current.addActionListener(chooseModelAction);
 		openButton.addActionListener(openModelAction);
 		validateButton.addActionListener(validateModelAction);
 		validateButton.setEnabled(false);
@@ -202,7 +242,7 @@ public class ValidatePanel extends JPanel {
 		buttonPanel.setBorder(BorderFactory.createCompoundBorder(
 				BorderFactory.createTitledBorder("Button Pane"),
 				BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-
+		
 		cc.fill = GridBagConstraints.BOTH;
 		cc.gridx = 0;
 		cc.gridy = 0;
@@ -211,15 +251,22 @@ public class ValidatePanel extends JPanel {
 		buttonPanel.add(openButton, cc);
 
 		cc.fill = GridBagConstraints.BOTH;
+		cc.gridx = 0;
+		cc.gridy = 1;
+		cc.weightx = 0.5;
+		cc.insets = new Insets(10, 10, 10, 10);
+		buttonPanel.add(openButton, cc);
+
+		cc.fill = GridBagConstraints.BOTH;
 		cc.gridx = 1;
-		cc.gridy = 0;
+		cc.gridy = 1;
 		cc.weightx = 0.5;
 		cc.insets = new Insets(10, 10, 10, 10);
 		buttonPanel.add(validateButton, cc);
 
 		cc.fill = GridBagConstraints.BOTH;
 		cc.gridx = 0;
-		cc.gridy = 1;
+		cc.gridy = 2;
 		cc.gridwidth = 2;
 		buttonPanel.add(validationStatusBar, cc);
 
@@ -271,6 +318,9 @@ public class ValidatePanel extends JPanel {
 				JOptionPane.getFrameForComponent(this), "", pk,
 				true, true);
 		SwingWorker<String, Void> sw = new SwingWorker<String, Void>() {
+			 String filename = null;
+			    String output   = "xml";
+			    String offcheck = null;
 
 			private long start;
 			private long stop;
@@ -279,6 +329,34 @@ public class ValidatePanel extends JPanel {
 			protected String doInBackground() throws Exception {
 				pk.setTaskName("Validating selected model");
 				start = System.currentTimeMillis();
+//				try
+//			    {
+//			      HashMap<String, String>       parameters = new HashMap<String, String>();
+//			      InputStream   result     = null;
+//
+//			      parameters.put("output", output);
+//			      if ( offcheck != null )
+//			      {
+//			        parameters.put("offcheck", offcheck);
+//			      }
+//			      filename = selectFile;
+//
+//			      result = SBMLValidator.validateSBML(filename, parameters);
+//			      stop = System.currentTimeMillis();
+//			      
+//			String res =   print(result, System.out);
+//			System.out.println(res);
+//			   validationResultPane.setText("");
+//			   append("validation error(s): " + res + "\n", Color.RED);
+//			      result.close();
+//			    }
+//			    catch (IOException e)
+//			    {
+//			      e.printStackTrace();
+//			    }finally {
+//				pk.finished();
+//			}
+				
 				try {
 					document = reader.readSBML(selectFile);
 
@@ -348,6 +426,24 @@ public class ValidatePanel extends JPanel {
 	}
 
 
+	  static String print (InputStream source, OutputStream destination)
+	    throws IOException
+	  {
+	    byte[] buffer = new byte[8192];
+	    int    nbytes = 0;
+
+	    while ((nbytes = source.read(buffer, 0, buffer.length)) >= 0)
+	    {
+	      destination.write(buffer, 0, nbytes);
+//	      validationResultPane.setText(destination.write(buffer, 0, nbytes));
+	    }
+	    destination.flush();
+	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+	    bos.writeTo( destination);
+	    bos.close();
+	    String res = new String( bos.toByteArray(), java.nio.charset.StandardCharsets.UTF_8 );
+	    return res;
+	  }
 
 	/**
 	 * This method appends the error messages generated by the SBMLError in the validate

@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.stream.XMLStreamException;
+
 import org.bridgedb.DataSource;
 import org.bridgedb.Xref;
 import org.pathvisio.core.model.DataNodeType;
@@ -109,14 +111,24 @@ public class PeerModel {
 		 * Save notes as comments
 		 */
 		if (doc.isSetNotes()) {
-			pathway.getMappInfo().addComment(doc.getNotesString(), "SBML");
+			try {
+				pathway.getMappInfo().addComment(doc.getNotesString(), "SBML");
+			} catch (XMLStreamException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		/*
 		 * Save Annotation
 		 */
 		if (doc.isSetAnnotation()) {
-			pathway.getMappInfo().addComment(doc.getAnnotationString(),
-					"Annotation");
+			try {
+				pathway.getMappInfo().addComment(doc.getAnnotationString(),
+						"Annotation");
+			} catch (XMLStreamException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		if (doc.isSetLevel()) {
 			pathway.getMappInfo().setDynamicProperty("SBML_Level",
@@ -209,7 +221,7 @@ public class PeerModel {
 					System.out.println("WARNING: couldn't convert " + t.get(0)
 							+ " to Xref");
 				} else {
-					pelt.setGeneID(ref.getId());
+					pelt.setElementID(ref.getId());
 					pelt.setDataSource(ref.getDataSource());
 				}
 			}
@@ -273,6 +285,7 @@ public class PeerModel {
 				String sid = re.getProduct(0).getSpecies();
 				PathwayElement pelt = pwy.getElementById(sid);
 				if (pelt != null) {
+					pelt.setGraphId(pwy.getUniqueGraphId());
 					xco = pelt.getMCenterX() + 100;
 					yco = pelt.getMCenterY();
 					next = false;
@@ -357,7 +370,7 @@ public class PeerModel {
 
 	PathwayElement sbgnAnnotate(PathwayElement pelt, String sId) {
 		Boolean datasourceset = false;
-		DataSource ds = DataSource.getBySystemCode("L");
+		DataSource ds = DataSource.getExistingBySystemCode("L");
 		if (doc.getModel().getSpecies(sId).isSetAnnotation()) {
 			Annotation annotation = doc.getModel().getSpecies(sId)
 					.getAnnotation();
@@ -373,20 +386,32 @@ public class PeerModel {
 			/*
 			 * Ontology databases
 			 */
-			if (database.contains("chebi")) {
+			if (database.contains("chebi") || database.contains("CHEBI")) {
 				datasourceset = true;
-				ds = DataSource.getBySystemCode("Ce");
-			} else {
-				if (database.equals("obo.go") || database.equals("go")) {
+				ds = DataSource.getExistingBySystemCode("Ce");
+			}else if (database.contains("pubchem.substance") || database.contains("PUBCHEM")) {
+				datasourceset = true;
+				ds = DataSource.getExistingBySystemCode("Cps");
+			}else if (database.contains("kegg") || database.contains("KEGG")) {
+				datasourceset = true;
+				ds = DataSource.getExistingBySystemCode("Ck");
+			}else if (database.contains("cas") || database.contains("CAS")) {
+				datasourceset = true;
+				ds = DataSource.getExistingBySystemCode("Ca");
+			}else {
+				if (database.equalsIgnoreCase("obo.go") || database.equalsIgnoreCase("go")) {
 					datasourceset = true;
-					ds = DataSource.getBySystemCode("T");
+					ds = DataSource.getExistingBySystemCode("T");
 				}else {
-					if (database.contains("uniprot")) {
+					if (database.contains("uniprot") || database.contains("UNIPROT")) {
 						datasourceset = true;
-						ds = DataSource.getBySystemCode("S");
+						ds = DataSource.getExistingBySystemCode("S");
 					}else {
 						try {
-							ds = DataSource.getByFullName(database);
+							ds = DataSource.getExistingByFullName(database.toUpperCase());
+							if(ds == null){
+							ds = DataSource.getExistingByFullName(database.toLowerCase());
+							}
 							datasourceset = true;
 						} catch (Exception e) {
 							System.out

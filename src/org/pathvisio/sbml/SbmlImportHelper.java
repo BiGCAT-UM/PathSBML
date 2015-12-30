@@ -19,6 +19,8 @@ package org.pathvisio.sbml;
 
 import java.io.File;
 
+import javax.swing.JOptionPane;
+
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.sbml.peer.PeerModel;
 import org.sbml.jsbml.SBMLDocument;
@@ -35,10 +37,13 @@ public class SbmlImportHelper {
 			.readSBML(file.getAbsolutePath());
 
 			br = PeerModel.createFromDoc(doc);
+			if(br.getDoc().getErrorCount() == 0)
+			JOptionPane.showMessageDialog(null, "Model Imported succesfully");
 		}
 		catch (Exception ex) {
+			System.out.println(ex.getStackTrace());
 			System.out.println("WARNING :" + doc.getModel().getName()
-					+ "could not be converted");
+					+ " could not be converted." +br.getDoc().getErrorCount()+" errors and warnings encountered. Check log for more details.");
 		}
 		return br.getPathway();
 	}

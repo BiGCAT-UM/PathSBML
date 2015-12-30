@@ -31,6 +31,7 @@ import org.pathvisio.core.model.ObjectType;
 import org.pathvisio.core.model.Pathway;
 import org.pathvisio.core.model.PathwayElement;
 import org.pathvisio.sbgn.SbgnFormat;
+import org.pathvisio.sbml.peer.PeerModel;
 import org.sbgn.ArcClazz;
 import org.sbgn.GlyphClazz;
 import org.sbml.jsbml.Annotation;
@@ -47,17 +48,20 @@ import org.sbml.jsbml.SpeciesReference;
 
 
 public class SbmlExportHelper {
-	private SBMLPlugin sib;
+		
 	/**
 	 * @throws ConverterException
 	 */
 	public void doExport() {
+		System.out.println(pathway.getMappInfo().getMapInfoName());
 		/*
 		 * Only export if all interactions are connected
 		 */
 		if (testInteractionConnectivity()) {
+			System.out.println("All interactions connected!");
 
 			makePorts();
+			
 			for (PathwayElement elt : pathway.getDataObjects()) {
 				addSpeciesReferences(elt);
 
@@ -67,7 +71,7 @@ public class SbmlExportHelper {
 
 			}
 
-			// createfromPathway();
+//			 createfromPathway();
 
 			SBMLDocument doc = new SBMLDocument();
 
@@ -82,16 +86,21 @@ public class SbmlExportHelper {
 
 				w.writeSBMLToFile(doc, file.getAbsolutePath());
 			} catch (SBMLException e) {
-				// TODO Auto-generated catch block
+				JOptionPane.showMessageDialog(null,
+						"SBML");
 				e.printStackTrace();
 			} catch (XMLStreamException e) {
-				// TODO Auto-generated catch block
+				JOptionPane.showMessageDialog(null,
+						"XML");
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				JOptionPane.showMessageDialog(null,
+						"IO");
 				e.printStackTrace();
 			}
 		} else {
+			System.out.println("WARNING :" + pathway.getMappInfo().getMapInfoName()
+					+ "could not be converted");
 			JOptionPane.showMessageDialog(null,
 					"Unconnected interactions found! Model cannot be exported");
 		}
@@ -233,9 +242,6 @@ public class SbmlExportHelper {
 
 	}
 
-	/**
-	 * checks if the given SBML document uses the SBML-layout extension
-	 */
 	private Model doModel() {
 		Model model = new Model();
 		model.setId(pathway.getMappInfo().getMapInfoName());
@@ -251,8 +257,7 @@ public class SbmlExportHelper {
 	 * @param pwy
 	 */
 	protected void makePorts() {
-		int i = 0;
-
+		System.out.println("Making ports");
 		for (PathwayElement elt : pathway.getDataObjects()) {
 			switch (elt.getObjectType()) {
 			case LINE: {
@@ -264,6 +269,8 @@ public class SbmlExportHelper {
 				}
 
 			}
+			default:
+				break;
 			}
 		}
 
